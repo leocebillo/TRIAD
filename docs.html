@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRIAD — Documentation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Space+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink-950:#0d0b09; --ink-900:#151210; --ink-800:#1c1813; --line:#2c2620;
+    --brass-300:#f2e2b8; --brass-400:#e3c383; --brass-500:#c9a469; --brass-700:#9c7b45;
+    --muted:#8a7a5c; --muted-dim:#5c5240; --good:#8fae8a; --warn:#c98f5a; --crit:#b56a5a;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--ink-950); color:var(--brass-300);
+    font-family:'Space Grotesk',sans-serif; display:flex; min-height:100vh;
+  }
+  ::selection{background:var(--brass-700);color:var(--ink-950);}
+  a{color:var(--brass-400);}
+
+  /* ---------- Sidebar (matches dashboard) ---------- */
+  .sidebar{
+    width:248px; flex-shrink:0; background:var(--ink-900); border-right:1px solid var(--line);
+    display:flex; flex-direction:column; padding:28px 20px; position:sticky; top:0; height:100vh; overflow-y:auto;
+  }
+  .brand{ display:flex; align-items:center; gap:12px; margin-bottom:32px; padding-left:2px; cursor:pointer; }
+  .brand svg{width:34px;height:34px;flex-shrink:0;}
+  .brand-name{ font-family:'Fraunces',serif; font-size:20px; letter-spacing:3px; color:var(--brass-300); }
+  .back-link{
+    display:flex; align-items:center; gap:8px; font-family:'JetBrains Mono',monospace; font-size:11.5px;
+    color:var(--muted); text-decoration:none; margin-bottom:28px; padding:8px 10px; border-radius:6px;
+    border:1px solid var(--line); transition:all .15s ease;
+  }
+  .back-link:hover{color:var(--brass-400);border-color:var(--brass-700);}
+
+  nav{display:flex;flex-direction:column;gap:1px;}
+  nav a{
+    display:block; padding:8px 10px; border-radius:6px; color:var(--muted); text-decoration:none;
+    font-size:13px; letter-spacing:0.2px; transition:background .15s ease,color .15s ease;
+  }
+  nav a:hover{color:var(--brass-400);background:var(--ink-800);}
+  nav .section-label{
+    font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:1.5px; color:var(--muted-dim);
+    text-transform:uppercase; margin:18px 0 6px 10px;
+  }
+  nav .section-label:first-child{margin-top:0;}
+
+  /* ---------- Main content ---------- */
+  main{flex:1; max-width:900px; padding:56px 64px 120px; }
+  .doc-header{margin-bottom:48px;}
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:3px; color:var(--muted-dim);
+    text-transform:uppercase; margin-bottom:10px;
+  }
+  h1{ font-family:'Fraunces',serif; font-weight:500; font-size:40px; color:var(--brass-300); letter-spacing:0.5px; }
+  .doc-header p{color:var(--muted); font-size:15px; margin-top:12px; max-width:560px; line-height:1.6;}
+
+  section{margin-bottom:56px; scroll-margin-top:32px;}
+  h2{
+    font-family:'Fraunces',serif; font-weight:500; font-size:24px; color:var(--brass-300);
+    margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--line);
+  }
+  h3{ font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:15px; color:var(--brass-400); margin:24px 0 10px; }
+  p{color:#c9bda0; font-size:14.5px; line-height:1.75; margin-bottom:14px;}
+  p.muted{color:var(--muted); font-size:13.5px;}
+  ul, ol{margin:0 0 16px 22px; color:#c9bda0; font-size:14.5px; line-height:1.8;}
+  li{margin-bottom:4px;}
+  strong{color:var(--brass-300); font-weight:600;}
+  code{
+    font-family:'JetBrains Mono',monospace; font-size:12.5px; background:var(--ink-800);
+    border:1px solid var(--line); border-radius:4px; padding:2px 6px; color:var(--brass-400);
+  }
+  pre{
+    background:var(--ink-900); border:1px solid var(--line); border-radius:8px; padding:16px 18px;
+    overflow-x:auto; margin:14px 0 18px;
+  }
+  pre code{ background:none; border:none; padding:0; font-size:12.5px; line-height:1.7; color:#c9bda0; }
+
+  .callout{
+    background:var(--ink-900); border:1px solid var(--line); border-left:3px solid var(--brass-700);
+    border-radius:0 8px 8px 0; padding:14px 18px; margin:16px 0; font-size:13.5px; color:var(--muted);
+  }
+  .callout b{color:var(--brass-400);}
+  .callout.warn{border-left-color:var(--warn);}
+  .callout.crit{border-left-color:var(--crit);}
+
+  table{ width:100%; border-collapse:collapse; margin:16px 0 20px; font-size:13.5px; }
+  th{
+    text-align:left; font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:0.5px;
+    text-transform:uppercase; color:var(--muted-dim); padding:8px 12px; border-bottom:1px solid var(--line);
+  }
+  td{padding:10px 12px; border-bottom:1px solid var(--ink-800); color:#c9bda0;}
+  tr:last-child td{border-bottom:none;}
+  .status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:7px;}
+  .status-dot.good{background:var(--good);}
+  .status-dot.warn{background:var(--warn);}
+  .status-dot.crit{background:var(--crit);}
+
+  .arch-diagram{
+    background:var(--ink-900); border:1px solid var(--line); border-radius:10px;
+    padding:24px; margin:18px 0; font-family:'JetBrains Mono',monospace; font-size:12.5px;
+    color:var(--muted); line-height:2;
+  }
+  .arch-diagram .node{color:var(--brass-400);}
+  .arch-diagram .arrow{color:var(--muted-dim);}
+
+  @media(max-width:900px){
+    body{flex-direction:column;}
+    .sidebar{width:100%;height:auto;position:relative;}
+    main{padding:32px 24px;}
+  }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="brand" onclick="window.location.href='index.html'">
+    <svg viewBox="0 0 256 256"><rect width="256" height="256" rx="48" fill="#100e0c"/>
+      <g transform="translate(128,134) scale(0.62)">
+        <path d="M -130,70 A 150,150 0 0,1 -18,-108" fill="none" stroke="#e3c383" stroke-width="7" stroke-linecap="round"/>
+        <path d="M 132,64 A 150,150 0 0,0 44,-105" fill="none" stroke="#c9a469" stroke-width="5.25" stroke-linecap="round" opacity="0.9"/>
+        <path d="M -84,118 A 150,150 0 0,1 96,104" fill="none" stroke="#9c7b45" stroke-width="3.75" stroke-linecap="round" opacity="0.8"/>
+        <circle cx="0" cy="0" r="7.5" fill="#fbf1d6"/>
+      </g>
+    </svg>
+    <div class="brand-name">TRIAD</div>
+  </div>
+
+  <a class="back-link" href="triad-dashboard.html">← Back to Dashboard</a>
+
+  <nav>
+    <div class="section-label">Overview</div>
+    <a href="#what-is-triad">What TRIAD Is</a>
+    <a href="#architecture">Architecture</a>
+    <a href="#status">Live vs. Limited</a>
+
+    <div class="section-label">Using It</div>
+    <a href="#pages">The Five Pages</a>
+    <a href="#new-prompt">New Prompt & Routing</a>
+    <a href="#requests">Handling Requests</a>
+    <a href="#adding-services">Adding a Service</a>
+
+    <div class="section-label">Setting It Up</div>
+    <a href="#firebase-setup">Firebase</a>
+    <a href="#worker-setup">Cloudflare Worker</a>
+    <a href="#github-pages">Deploying to GitHub Pages</a>
+
+    <div class="section-label">Reference</div>
+    <a href="#security">Security Model</a>
+    <a href="#limitations">Known Limitations</a>
+    <a href="#troubleshooting">Troubleshooting</a>
+  </nav>
+</aside>
+
+<main>
+  <div class="doc-header">
+    <div class="eyebrow">Documentation</div>
+    <h1>How TRIAD Works</h1>
+    <p>One console for Claude, ChatGPT, Gemini, and anything else you connect — what's real, what's still a demo, and how to run your own copy.</p>
+  </div>
+
+  <section id="what-is-triad">
+    <h2>What TRIAD Is</h2>
+    <p>TRIAD is a personal dashboard for routing work across multiple AI services instead of juggling separate tabs. You type one request, it gets split into pieces matched to whichever connected service fits each piece best, and you watch real rate-limit usage, task progress, and a running log — all from one place.</p>
+    <p>It's built with no frameworks — plain HTML/CSS/JS on the frontend, matching the rest of this site's structure. There's no build step; the dashboard is a single file you can open directly or host anywhere that serves static files.</p>
+  </section>
+
+  <section id="architecture">
+    <h2>Architecture</h2>
+    <p>Three pieces, each doing one job:</p>
+    <div class="arch-diagram">
+      <span class="node">Browser (triad-dashboard.html)</span><br>
+      &nbsp;&nbsp;<span class="arrow">├─</span> Firebase Auth <span class="arrow">→</span> anonymous sign-in, gives you a stable identity<br>
+      &nbsp;&nbsp;<span class="arrow">├─</span> Firestore <span class="arrow">→</span> tasks / logs / requests, synced in real time<br>
+      &nbsp;&nbsp;<span class="arrow">└─</span> Cloudflare Worker <span class="arrow">→</span> holds API keys, calls each provider<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="arrow">└─</span> Workers KV <span class="arrow">→</span> where keys actually live, never in the browser
+    </div>
+    <p>The split matters for one reason: <strong>your API keys never touch the browser after the moment you paste them</strong>. They go straight to the Worker, which stores them server-side in KV and is the only thing that ever makes the real calls to Claude/ChatGPT/Gemini/etc. The dashboard just asks the Worker to run something and gets a result back.</p>
+    <p>Firestore is separate from that — it's not for secrets, it's for everything the UI needs to sync live: task progress, the activity log, and requests. Firestore's security rules scope every document to your own signed-in <code>uid</code>, so even though the database is technically reachable from any browser, nothing readable belongs to anyone but you.</p>
+  </section>
+
+  <section id="status">
+    <h2>Live vs. Limited</h2>
+    <p>Not everything shown in TRIAD is equally "real" — here's the honest breakdown so nothing surprises you once you're relying on it:</p>
+    <table>
+      <tr><th>Feature</th><th>Status</th><th>Notes</th></tr>
+      <tr><td>Tasks, logs, requests</td><td><span class="status-dot good"></span>Real-time</td><td>Stored in Firestore, synced via <code>onSnapshot</code> — survives refresh, updates live across tabs.</td></tr>
+      <tr><td>New Prompt execution</td><td><span class="status-dot good"></span>Real</td><td>Confirming a plan actually calls the Worker, which actually calls the model.</td></tr>
+      <tr><td>Claude / ChatGPT / Groq usage gauges</td><td><span class="status-dot good"></span>Real (on refresh)</td><td>Pulled from actual rate-limit response headers. Click "Refresh Usage" to update — it's a real API call, so it's manual, not polled.</td></tr>
+      <tr><td>Gemini / Mistral / Workers AI gauges</td><td><span class="status-dot warn"></span>Not trackable</td><td>These providers don't expose per-request rate-limit headers at all. Fully usable, just not measurable the same way.</td></tr>
+      <tr><td>Automatic model-initiated requests</td><td><span class="status-dot crit"></span>Not built yet</td><td>Nothing currently detects "this model needs clarification" and creates a Request automatically — that needs the model call to signal it explicitly, which isn't wired up.</td></tr>
+      <tr><td>Meshy / Suno calls</td><td><span class="status-dot warn"></span>Unverified</td><td>Written against each provider's typical REST shape but not confirmed against live docs — check before relying on it.</td></tr>
+    </table>
+  </section>
+
+  <section id="pages">
+    <h2>The Five Pages</h2>
+    <h3>Overview</h3>
+    <p>Rate-limit gauges for whatever's connected and capable of showing real usage, plus a recent-activity feed. Nothing shows here until you've connected at least one service with header-based tracking (Claude, ChatGPT, or Groq).</p>
+    <h3>Log Check</h3>
+    <p>Every completed (or failed) task, with date, time, and which service handled it. This is the running record — mostly useful for looking back at what actually happened across a session.</p>
+    <h3>Requests</h3>
+    <p>Where you'd respond to something a model flagged mid-task — approve a decision, hand over account details, whatever it needs. Right now these are only created by you or seeded as demo data, since automatic model-initiated requests aren't built (see <a href="#status">Live vs. Limited</a>).</p>
+    <h3>Tasks</h3>
+    <p>Live status for anything running or finished — queued, running, complete, or failed, with the actual error message shown if something broke.</p>
+    <h3>Settings</h3>
+    <p>Connect or remove services, set routing preferences, and manage what's visible. Covered in detail below.</p>
+  </section>
+
+  <section id="new-prompt">
+    <h2>New Prompt & Routing</h2>
+    <p>Click <strong>+ New Prompt</strong> on Overview, describe what you need in plain language, and hit <strong>Break It Down</strong>. TRIAD splits it into steps and proposes a service for each one, with a short reason why — you can override any assignment before confirming.</p>
+    <p>Routing works two ways, set in <strong>Settings → Routing</strong>:</p>
+    <ul>
+      <li><strong>Auto (best fit)</strong> — the default. Capability keywords (3D, music, etc.) route to Meshy/Suno; everything else splits across a scope → build → review pattern.</li>
+      <li><strong>A specific default model</strong> — overrides the split entirely and sends reasoning steps to whichever model you've picked, falling back through your configured <strong>Fallback order</strong> if that model isn't actually connected.</li>
+    </ul>
+    <p class="muted">Capability-specific tools (Meshy, Suno) never silently fall back to a text model — there's no reasonable substitute for "generate a 3D asset" among reasoning models, so a disconnected tool just gets flagged instead of misrouted.</p>
+  </section>
+
+  <section id="requests">
+    <h2>Handling Requests</h2>
+    <p>Click a request card to expand it. If it's <strong>Open</strong>, type your response and hit <strong>Send Response</strong> — that moves it to <strong>Responded</strong>. From there, <strong>Mark Complete &amp; Notify</strong> closes the loop. Every state change writes straight to Firestore, so it's reflected instantly if you have the dashboard open in another tab.</p>
+  </section>
+
+  <section id="adding-services">
+    <h2>Adding a Service</h2>
+    <p>Settings → Connected Services → <strong>+ Add Another Service</strong>. Two categories:</p>
+    <ul>
+      <li><strong>Tool</strong> — image/video/audio generation, anything task-specific. No endpoint required at creation.</li>
+      <li><strong>Reasoning model</strong> — needs an API endpoint (base URL). Must accept the same request shape as OpenAI's <code>/chat/completions</code> — true for most providers today (OpenRouter, Together, Fireworks, DeepSeek, and others).</li>
+    </ul>
+    <p>Built-in services (Claude, ChatGPT, Gemini, Groq, Mistral, Workers AI, Meshy, Suno) can be <strong>Hidden</strong> from view if you don't use them, but not deleted — the Worker has specific code for each. Anything you add yourself can be fully <strong>Deleted</strong>.</p>
+  </section>
+
+  <section id="firebase-setup">
+    <h2>Firebase Setup</h2>
+    <p>Firestore and Auth run on Firebase's free Spark plan — no billing required for this part.</p>
+    <ol>
+      <li>Create a project at <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a></li>
+      <li><strong>Build → Firestore Database → Create database</strong> (production mode)</li>
+      <li><strong>Build → Authentication → Sign-in method → Anonymous → Enable</strong></li>
+      <li><strong>Project settings → General → Your apps → Web (&lt;/&gt;)</strong> — register an app, copy the config object</li>
+      <li>Paste that config into <code>triad-dashboard.html</code>, where it says <code>firebaseConfig</code></li>
+    </ol>
+    <div class="callout">
+      <b>Deploy the security rules too.</b> <code>firestore.rules</code> is what actually enforces that your data stays yours — deploy it with <code>firebase deploy --only firestore:rules</code>, or nothing will be readable/writable at all.
+    </div>
+  </section>
+
+  <section id="worker-setup">
+    <h2>Cloudflare Worker Setup</h2>
+    <p>The Worker is what holds your API keys and makes real calls to each provider — it deliberately replaces Firebase Cloud Functions, since those require the paid Blaze plan just to make outbound requests. Cloudflare's free tier (100,000 requests/day) needs no card at all.</p>
+    <pre><code>npm install -g wrangler
+wrangler login          # or use an API token if OAuth can't reach your browser
+wrangler kv namespace create TRIAD_KEYS
+# paste the id it prints into wrangler.toml
+wrangler secret put DASHBOARD_TOKEN
+wrangler deploy</code></pre>
+    <p>Copy the resulting <code>*.workers.dev</code> URL and your <code>DASHBOARD_TOKEN</code> into <code>triad-dashboard.html</code> where it says <code>WORKER_URL</code> and <code>DASHBOARD_TOKEN</code>.</p>
+    <div class="callout warn">
+      <b>Cloud Shell / headless environments:</b> <code>wrangler login</code> tries to open a browser callback that often can't be reached from a cloud terminal. Use an API token instead: create one at <a href="https://dash.cloudflare.com/profile/api-tokens" target="_blank">dash.cloudflare.com/profile/api-tokens</a> with Workers Scripts + Workers KV Storage edit permissions, then <code>export CLOUDFLARE_API_TOKEN=your_token</code> before running any <code>wrangler</code> command.
+    </div>
+  </section>
+
+  <section id="github-pages">
+    <h2>Deploying to GitHub Pages</h2>
+    <p>The dashboard is static — no build step, no server needed for the frontend itself. GitHub Pages serves it as-is.</p>
+    <ol>
+      <li>Push <code>index.html</code>, <code>triad-dashboard.html</code>, and this <code>docs.html</code> to a GitHub repo</li>
+      <li>Repo <strong>Settings → Pages → Source</strong> → deploy from your main branch</li>
+      <li>Once live, your dashboard URL becomes the one place you actually use — the Firebase config and Worker URL are already baked into the file, nothing else to configure</li>
+    </ol>
+    <div class="callout crit">
+      <b>Before pushing:</b> double-check <code>triad-dashboard.html</code> doesn't contain a real, currently-valid API key pasted directly into the file anywhere. Keys belong in Settings (which sends them to the Worker/KV), never hardcoded into the HTML itself — GitHub Pages repos are public unless you're on a paid plan with private Pages.
+    </div>
+  </section>
+
+  <section id="security">
+    <h2>Security Model</h2>
+    <ul>
+      <li><strong>API keys</strong> live only in Cloudflare Workers KV. The browser sends a key once, on save, and never sees it again — <code>renderServices()</code> shows a masked placeholder, not the real value.</li>
+      <li><strong>The Worker</strong> is gated by a single shared passphrase (<code>DASHBOARD_TOKEN</code>) sent as a header on every request. This is a single-user tool, so that's sufficient — it's not meant to support multiple separate accounts.</li>
+      <li><strong>Firestore</strong> data (tasks/logs/requests) is scoped per-<code>uid</code> via security rules — readable and writable only by the session that created it.</li>
+      <li><strong>The <code>secrets</code> collection</strong> in Firestore is fully locked (<code>allow read, write: if false</code>) — vestigial from an earlier architecture, kept locked down since nothing should ever write there.</li>
+    </ul>
+  </section>
+
+  <section id="limitations">
+    <h2>Known Limitations</h2>
+    <ul>
+      <li>No automatic detection of "this model needs your input" — Requests are manually created or seeded, not generated by an actual model signal.</li>
+      <li>Gemini, Mistral, and Workers AI can't show live rate-limit gauges — those providers don't expose the headers needed, full stop, not a bug to fix.</li>
+      <li>Meshy and Suno integration code is written but not verified against live traffic — their exact request/response shape should be double-checked against current docs before depending on it.</li>
+      <li>Tasks run sequentially, one at a time, even when steps don't strictly depend on each other — simple and predictable, but not the fastest possible execution.</li>
+      <li>"Refresh Usage" makes a real, tiny API call each time you click it — cheap, but not literally free, and not something to auto-poll.</li>
+    </ul>
+  </section>
+
+  <section id="troubleshooting">
+    <h2>Troubleshooting</h2>
+    <h3>Backend shows OFFLINE</h3>
+    <p>Check both halves independently: Firebase config filled in correctly (not still the <code>PASTE_YOUR_...</code> placeholders), and <code>WORKER_URL</code>/<code>DASHBOARD_TOKEN</code> matching exactly what you deployed. A hard refresh (Ctrl/Cmd+Shift+R) rules out a stale cached copy.</p>
+    <h3>"Unauthorized" when saving a key</h3>
+    <p>The token in the dashboard doesn't match what's set on the Worker. Test directly against the Worker with <code>curl</code> to isolate which side is wrong before changing anything.</p>
+    <h3>A model call fails immediately</h3>
+    <p>Almost always account-side, not code-side — check the provider's billing/credits page. A 400 usually means a bad request (wrong model name); a 429 usually means quota or billing, not "too many requests" in the literal sense.</p>
+    <h3>Firestore permission-denied</h3>
+    <p>Confirm <code>firestore.rules</code> is actually deployed (<code>firebase deploy --only firestore:rules</code>) and that you're signed in (check <code>console.log</code> for "Signed in: ..." — anonymous auth needs to succeed before any read/write will pass the rules.)</p>
+  </section>
+
+</main>
+
+</body>
+</html>

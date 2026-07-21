@@ -1,0 +1,1859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRIAD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Space+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink-950:#0d0b09;
+    --ink-900:#151210;
+    --ink-800:#1c1813;
+    --ink-700:#241f18;
+    --line:#2c2620;
+    --brass-300:#f2e2b8;
+    --brass-400:#e3c383;
+    --brass-500:#c9a469;
+    --brass-700:#9c7b45;
+    --muted:#8a7a5c;
+    --muted-dim:#5c5240;
+    --good:#8fae8a;
+    --warn:#c98f5a;
+    --crit:#b56a5a;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    background:var(--ink-950);
+    color:var(--brass-300);
+    font-family:'Space Grotesk',sans-serif;
+    display:flex;
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  ::selection{background:var(--brass-700);color:var(--ink-950);}
+
+  /* ---------- Sidebar ---------- */
+  .sidebar{
+    width:248px;
+    flex-shrink:0;
+    background:var(--ink-900);
+    border-right:1px solid var(--line);
+    display:flex;
+    flex-direction:column;
+    padding:28px 20px;
+    position:sticky;
+    top:0;
+    height:100vh;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:40px;
+    padding-left:2px;
+  }
+  .brand svg{width:34px;height:34px;flex-shrink:0;}
+  .brand-name{
+    font-family:'Fraunces',serif;
+    font-size:20px;
+    letter-spacing:3px;
+    color:var(--brass-300);
+  }
+  nav{display:flex;flex-direction:column;gap:2px;flex:1;}
+  .nav-item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:11px 12px;
+    border-radius:6px;
+    color:var(--muted);
+    font-size:13.5px;
+    letter-spacing:0.3px;
+    cursor:pointer;
+    transition:background .15s ease,color .15s ease;
+    border:1px solid transparent;
+  }
+  .nav-item:hover{color:var(--brass-400);background:var(--ink-800);}
+  .nav-item.active{
+    color:var(--brass-300);
+    background:var(--ink-800);
+    border-color:var(--line);
+  }
+  .nav-item .dot{width:5px;height:5px;border-radius:50%;background:var(--muted-dim);flex-shrink:0;}
+  .nav-item.active .dot{background:var(--brass-400);box-shadow:0 0 6px var(--brass-400);}
+
+  .sidebar-foot{
+    border-top:1px solid var(--line);
+    padding-top:16px;
+    margin-top:16px;
+  }
+  .live-pulse{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    color:var(--muted);
+    letter-spacing:0.5px;
+  }
+  .pulse-ring{
+    width:8px;height:8px;border-radius:50%;
+    background:var(--good);
+    box-shadow:0 0 0 0 rgba(143,174,138,.6);
+    animation:pulse 2.2s infinite;
+  }
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(143,174,138,.5);}
+    70%{box-shadow:0 0 0 7px rgba(143,174,138,0);}
+    100%{box-shadow:0 0 0 0 rgba(143,174,138,0);}
+  }
+
+  /* ---------- Main ---------- */
+  main{flex:1;padding:36px 44px;max-width:1180px;}
+  .view{display:none;}
+  .view.active{display:block;animation:fadein .3s ease;}
+  @keyframes fadein{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+  .page-head{margin-bottom:32px;}
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    letter-spacing:3px;
+    color:var(--muted-dim);
+    text-transform:uppercase;
+    margin-bottom:8px;
+  }
+  h1{
+    font-family:'Fraunces',serif;
+    font-weight:500;
+    font-size:32px;
+    color:var(--brass-300);
+    letter-spacing:0.5px;
+  }
+  .sub{color:var(--muted);font-size:14px;margin-top:6px;max-width:520px;line-height:1.5;}
+
+  /* ---------- Gauges (Overview) ---------- */
+  .gauge-row{display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:20px;margin-bottom:20px;}
+  .tool-row{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:32px;}
+  .tool-card{
+    background:var(--ink-900);border:1px solid var(--line);border-radius:10px;
+    padding:16px 18px;display:flex;flex-direction:column;gap:10px;
+  }
+  .tool-card-top{display:flex;justify-content:space-between;align-items:center;}
+  .tool-card-name{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--brass-400);}
+  .tool-card-name .swatch{width:8px;height:8px;border-radius:50%;}
+  .tool-card-cap{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted-dim);}
+  .tool-bar-track{height:5px;background:var(--ink-800);border-radius:4px;overflow:hidden;}
+  .tool-bar-fill{height:100%;border-radius:4px;}
+  .tool-card-meta{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--muted);}
+  .gauge-card{
+    background:var(--ink-900);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:24px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:14px;
+  }
+  .gauge-model{
+    display:flex;align-items:center;gap:8px;
+    font-size:13px;letter-spacing:0.5px;color:var(--brass-400);
+    align-self:flex-start;
+  }
+  .gauge-model .swatch{width:8px;height:8px;border-radius:50%;}
+  .gauge-svg{width:150px;height:150px;}
+  .gauge-pct{font-family:'JetBrains Mono',monospace;font-size:26px;color:var(--brass-300);}
+  .gauge-label{font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:-10px;}
+  .gauge-meta{
+    width:100%;
+    display:flex;justify-content:space-between;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;color:var(--muted);
+    border-top:1px solid var(--line);
+    padding-top:12px;
+  }
+  .gauge-meta span{color:var(--brass-500);}
+
+  /* ---------- Panels ---------- */
+  .panel{
+    background:var(--ink-900);
+    border:1px solid var(--line);
+    border-radius:10px;
+    overflow:hidden;
+  }
+  .panel-head{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:16px 20px;
+    border-bottom:1px solid var(--line);
+  }
+  .panel-title{font-size:13px;letter-spacing:1px;color:var(--brass-400);text-transform:uppercase;}
+  .panel-count{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);}
+
+  /* Log rows */
+  .log-row{
+    display:grid;
+    grid-template-columns:64px 64px 96px 1fr;
+    gap:14px;
+    padding:13px 20px;
+    border-bottom:1px solid var(--ink-800);
+    font-size:13px;
+    align-items:baseline;
+  }
+  .log-row:last-child{border-bottom:none;}
+  .log-date{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);}
+  .log-time{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--muted-dim);}
+  .tag{
+    display:inline-flex;align-items:center;gap:6px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:10.5px;letter-spacing:0.5px;
+    padding:3px 8px;border-radius:20px;
+    border:1px solid var(--line);
+    width:fit-content;
+  }
+  .tag .swatch{width:6px;height:6px;border-radius:50%;}
+  .log-text{color:var(--brass-300);opacity:0.9;}
+
+  /* Requests */
+  .req-filters{display:flex;gap:8px;padding:14px 20px;border-bottom:1px solid var(--line);}
+  .req-filter{
+    font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.5px;
+    padding:5px 12px;border-radius:20px;border:1px solid var(--line);
+    color:var(--muted);cursor:pointer;text-transform:uppercase;transition:all .15s ease;
+  }
+  .req-filter:hover{color:var(--brass-400);}
+  .req-filter.active{background:var(--ink-800);color:var(--brass-400);border-color:var(--brass-700);}
+
+  .req-card{border-bottom:1px solid var(--ink-800);}
+  .req-card:last-child{border-bottom:none;}
+  .req-head{
+    display:grid;
+    grid-template-columns:96px 1fr 110px 18px;
+    gap:16px;
+    padding:15px 20px;
+    align-items:center;
+    cursor:pointer;
+  }
+  .req-head:hover{background:var(--ink-800);}
+  .req-text{font-size:13.5px;color:var(--brass-300);}
+  .req-status-badge{
+    font-family:'JetBrains Mono',monospace;font-size:10px;
+    text-align:center;letter-spacing:0.5px;text-transform:uppercase;
+    padding:4px 10px;border-radius:20px;border:1px solid var(--line);
+    justify-self:end;
+  }
+  .req-status-badge.open{color:var(--warn);border-color:var(--warn);}
+  .req-status-badge.responded{color:var(--brass-400);border-color:var(--brass-700);}
+  .req-status-badge.complete{color:var(--good);border-color:var(--good);}
+  .req-chevron{color:var(--muted-dim);font-size:12px;transition:transform .2s ease;justify-self:end;}
+  .req-card.expanded .req-chevron{transform:rotate(180deg);}
+
+  .req-body{
+    max-height:0;overflow:hidden;transition:max-height .25s ease;
+    background:var(--ink-950);
+  }
+  .req-card.expanded .req-body{max-height:400px;}
+  .req-body-inner{padding:4px 20px 20px 20px;}
+  .req-response-existing{
+    font-size:12.5px;color:var(--muted);background:var(--ink-900);
+    border:1px solid var(--line);border-left:2px solid var(--brass-700);
+    border-radius:0 6px 6px 0;padding:10px 14px;margin-bottom:12px;line-height:1.6;
+  }
+  .req-response-existing .label{
+    display:block;font-family:'JetBrains Mono',monospace;font-size:10px;
+    color:var(--brass-500);letter-spacing:0.5px;margin-bottom:4px;text-transform:uppercase;
+  }
+  .req-textarea{
+    width:100%;background:var(--ink-800);border:1px solid var(--line);
+    border-radius:6px;padding:11px 13px;color:var(--brass-300);
+    font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.6;
+    resize:vertical;min-height:70px;
+  }
+  .req-textarea:focus{outline:none;border-color:var(--brass-700);}
+  .req-actions{display:flex;gap:10px;margin-top:12px;}
+  .req-btn{
+    font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.5px;
+    padding:9px 16px;border-radius:6px;cursor:pointer;border:none;transition:all .15s ease;
+  }
+  .req-btn-send{background:linear-gradient(135deg,var(--brass-400),var(--brass-700));color:var(--ink-950);font-weight:500;}
+  .req-btn-send:hover{filter:brightness(1.1);}
+  .req-btn-complete{background:transparent;border:1px solid var(--good);color:var(--good);}
+  .req-btn-complete:hover{background:rgba(143,174,138,0.1);}
+  .req-btn:disabled{opacity:0.35;cursor:not-allowed;}
+  .req-timestamp{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted-dim);margin-top:10px;}
+
+  /* Tasks */
+  .task-card{padding:18px 20px;border-bottom:1px solid var(--ink-800);}
+  .task-card:last-child{border-bottom:none;}
+  .task-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;}
+  .task-title{font-size:14px;color:var(--brass-300);}
+  .task-pct{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--brass-500);}
+  .bar-track{height:6px;background:var(--ink-800);border-radius:4px;overflow:hidden;margin-bottom:8px;}
+  .bar-fill{height:100%;background:linear-gradient(90deg,var(--brass-700),var(--brass-400));border-radius:4px;transition:width .6s ease;}
+  .task-meta{display:flex;gap:14px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--muted);}
+  .task-card{cursor:default;}
+  .task-view-output{
+    font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--brass-500);
+    cursor:pointer;text-decoration:underline;text-underline-offset:2px;
+  }
+  .task-view-output:hover{color:var(--brass-400);}
+  .task-output{
+    max-height:0;overflow:hidden;transition:max-height .25s ease;
+  }
+  .task-output.expanded{max-height:600px;overflow-y:auto;}
+  .task-output-inner{
+    margin-top:10px;padding:12px 14px;background:var(--ink-950);border:1px solid var(--line);
+    border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.6;
+    color:#c9bda0;white-space:pre-wrap;word-break:break-word;
+  }
+  .task-copy-btn{
+    font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.5px;
+    padding:4px 10px;border-radius:20px;border:1px solid var(--line);color:var(--muted);
+    cursor:pointer;background:transparent;margin-top:8px;
+  }
+  .task-copy-btn:hover{color:var(--brass-400);border-color:var(--brass-700);}
+
+  .btn-small{
+    font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.5px;
+    padding:8px 15px;border-radius:6px;cursor:pointer;border:none;
+    background:linear-gradient(135deg,var(--brass-400),var(--brass-700));color:var(--ink-950);font-weight:500;
+    transition:filter .15s ease;
+  }
+  .btn-small:hover{filter:brightness(1.1);}
+
+  /* New Prompt modal */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(13,11,9,0.75);backdrop-filter:blur(2px);
+    display:none;align-items:flex-start;justify-content:center;z-index:50;padding:60px 20px;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal{
+    background:var(--ink-900);border:1px solid var(--line);border-radius:12px;
+    width:100%;max-width:600px;max-height:80vh;overflow-y:auto;
+    animation:modalin .2s ease;
+  }
+  @keyframes modalin{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
+  .modal-head{
+    padding:20px 24px;border-bottom:1px solid var(--line);
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  .modal-head h2{font-family:'Fraunces',serif;font-size:19px;font-weight:500;color:var(--brass-300);}
+  .modal-close{cursor:pointer;color:var(--muted);font-size:18px;line-height:1;}
+  .modal-close:hover{color:var(--brass-400);}
+  .modal-body{padding:24px;}
+  .modal-body label{display:block;font-size:12px;color:var(--muted);margin-bottom:8px;}
+  .prompt-textarea{
+    width:100%;background:var(--ink-800);border:1px solid var(--line);
+    border-radius:8px;padding:13px 15px;color:var(--brass-300);
+    font-family:'Space Grotesk',sans-serif;font-size:13.5px;line-height:1.6;
+    resize:vertical;min-height:90px;
+  }
+  .prompt-textarea:focus{outline:none;border-color:var(--brass-700);}
+  .prompt-hint{font-size:11.5px;color:var(--muted-dim);margin-top:8px;line-height:1.5;}
+  .modal-actions{display:flex;gap:10px;margin-top:18px;}
+  .btn-decompose{flex:1;text-align:center;justify-content:center;}
+  .btn-cancel{
+    font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.5px;
+    padding:9px 16px;border-radius:6px;cursor:pointer;background:transparent;
+    border:1px solid var(--line);color:var(--muted);
+  }
+  .btn-cancel:hover{color:var(--brass-400);border-color:var(--brass-700);}
+
+  .spinner{
+    width:16px;height:16px;border:2px solid rgba(16,14,12,0.3);border-top-color:var(--ink-950);
+    border-radius:50%;animation:spin .7s linear infinite;display:inline-block;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .plan-header{
+    display:flex;align-items:center;gap:8px;
+    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1px;
+    color:var(--muted);text-transform:uppercase;margin-bottom:14px;
+  }
+  .plan-item{
+    background:var(--ink-800);border:1px solid var(--line);border-radius:8px;
+    padding:14px 16px;margin-bottom:10px;
+  }
+  .plan-item-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+  .plan-item-title{font-size:13.5px;color:var(--brass-300);}
+  .plan-item-why{font-size:11.5px;color:var(--muted);line-height:1.5;}
+  .model-select{
+    background:var(--ink-900);border:1px solid var(--line);border-radius:20px;
+    padding:5px 10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--brass-300);
+    cursor:pointer;
+  }
+  .plan-deps{
+    font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted-dim);
+    margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);
+  }
+
+  /* Settings */
+  .settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  .service-row{
+    display:grid;grid-template-columns:20px 1fr auto;gap:12px;align-items:start;
+    padding:14px 0;border-bottom:1px solid var(--ink-800);
+  }
+  .service-row:last-child{border-bottom:none;}
+  .service-swatch{width:11px;height:11px;border-radius:50%;margin-top:4px;}
+  .service-name-row{display:flex;align-items:center;gap:8px;margin-bottom:2px;}
+  .service-name{font-size:13.5px;color:var(--brass-300);}
+  .service-cap{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;display:block;margin-bottom:8px;}
+  .service-type-badge{
+    font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.5px;text-transform:uppercase;
+    padding:2px 7px;border-radius:20px;border:1px solid var(--line);color:var(--muted-dim);
+  }
+  .key-row{display:flex;gap:8px;align-items:center;}
+  .key-input{
+    flex:1;background:var(--ink-800);border:1px solid var(--line);border-radius:6px;
+    padding:8px 11px;color:var(--brass-300);font-family:'JetBrains Mono',monospace;font-size:12px;
+  }
+  .key-input:focus{outline:none;border-color:var(--brass-700);}
+  .key-btn{
+    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.5px;
+    padding:8px 13px;border-radius:6px;cursor:pointer;white-space:nowrap;
+  }
+  .key-btn-save{background:linear-gradient(135deg,var(--brass-400),var(--brass-700));color:var(--ink-950);border:none;font-weight:500;}
+  .key-btn-save:hover{filter:brightness(1.1);}
+  .key-btn-edit{background:transparent;border:1px solid var(--line);color:var(--muted);}
+  .key-btn-edit:hover{color:var(--brass-400);border-color:var(--brass-700);}
+  .conn-status{
+    display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:10.5px;
+    letter-spacing:0.5px;text-transform:uppercase;
+  }
+  .conn-status.on{color:var(--good);}
+  .conn-status.off{color:var(--muted-dim);}
+  .conn-dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+  .backend-banner{
+    background:var(--ink-800);border:1px solid var(--brass-700);border-radius:8px;
+    padding:12px 15px;margin-bottom:16px;font-size:12px;color:var(--muted);line-height:1.6;
+  }
+  .backend-banner b{color:var(--brass-400);}
+  .fallback-row{
+    display:flex;align-items:center;gap:10px;
+    background:var(--ink-800);border:1px solid var(--line);border-radius:6px;
+    padding:8px 12px;margin-bottom:6px;
+  }
+  .fallback-row:last-child{margin-bottom:0;}
+  .fallback-rank{
+    font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--muted-dim);
+    width:16px;flex-shrink:0;
+  }
+  .fallback-name{flex:1;font-size:13px;color:var(--brass-300);display:flex;align-items:center;gap:8px;}
+  .fallback-btns{display:flex;gap:4px;}
+  .fallback-btn{
+    width:22px;height:22px;border-radius:4px;border:1px solid var(--line);background:transparent;
+    color:var(--muted);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;
+  }
+  .fallback-btn:hover{color:var(--brass-400);border-color:var(--brass-700);}
+  .fallback-btn:disabled{opacity:0.25;cursor:not-allowed;}
+  .fallback-empty{color:var(--muted-dim);font-family:'JetBrains Mono',monospace;font-size:11.5px;padding:8px 0;}
+  .field-group{
+    background:var(--ink-900);border:1px solid var(--line);border-radius:10px;
+    padding:20px;
+  }
+  .field-group h3{font-size:13px;letter-spacing:1px;color:var(--brass-400);text-transform:uppercase;margin-bottom:16px;font-weight:500;}
+  .field{margin-bottom:16px;}
+  .field:last-child{margin-bottom:0;}
+  .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;}
+  .field input[type=text],.field select{
+    width:100%;background:var(--ink-800);border:1px solid var(--line);
+    border-radius:6px;padding:9px 11px;color:var(--brass-300);
+    font-family:'JetBrains Mono',monospace;font-size:12.5px;
+  }
+  .field input:focus,.field select:focus{outline:none;border-color:var(--brass-700);}
+  .toggle-row{display:flex;justify-content:space-between;align-items:center;}
+  .switch{width:38px;height:20px;background:var(--ink-800);border:1px solid var(--line);border-radius:20px;position:relative;cursor:pointer;flex-shrink:0;}
+  .switch.on{background:var(--brass-700);}
+  .switch::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--brass-300);transition:left .15s ease;}
+  .switch.on::after{left:19px;background:var(--ink-950);}
+
+  @media(max-width:900px){
+    body{flex-direction:column;}
+    .sidebar{width:100%;height:auto;position:relative;flex-direction:row;align-items:center;padding:16px 20px;overflow-x:auto;}
+    .brand{margin-bottom:0;margin-right:20px;}
+    nav{flex-direction:row;}
+    .sidebar-foot{display:none;}
+    main{padding:24px;}
+    .gauge-row{grid-template-columns:1fr;}
+    .settings-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="brand" onclick="window.location.href='index.html'" style="cursor:pointer;">
+    <svg viewBox="0 0 256 256"><rect width="256" height="256" rx="48" fill="#100e0c"/>
+      <g transform="translate(128,134) scale(0.62)">
+        <path d="M -130,70 A 150,150 0 0,1 -18,-108" fill="none" stroke="#e3c383" stroke-width="7" stroke-linecap="round"/>
+        <path d="M 132,64 A 150,150 0 0,0 44,-105" fill="none" stroke="#c9a469" stroke-width="5.25" stroke-linecap="round" opacity="0.9"/>
+        <path d="M -84,118 A 150,150 0 0,1 96,104" fill="none" stroke="#9c7b45" stroke-width="3.75" stroke-linecap="round" opacity="0.8"/>
+        <circle cx="0" cy="0" r="7.5" fill="#fbf1d6"/>
+      </g>
+    </svg>
+    <div class="brand-name">TRIAD</div>
+  </div>
+
+  <nav>
+    <div class="nav-item active" data-view="overview"><span class="dot"></span>Overview</div>
+    <div class="nav-item" data-view="logs"><span class="dot"></span>Log Check</div>
+    <div class="nav-item" data-view="requests"><span class="dot"></span>Requests</div>
+    <div class="nav-item" data-view="tasks"><span class="dot"></span>Tasks</div>
+    <div class="nav-item" data-view="settings"><span class="dot"></span>Settings</div>
+    <a href="docs.html" class="nav-item" style="text-decoration:none;margin-top:8px;border-top:1px solid var(--line);padding-top:19px;"><span class="dot"></span>Documentation</a>
+  </nav>
+
+  <div class="sidebar-foot">
+    <div class="live-pulse"><span class="pulse-ring"></span>LIVE · SYNCED</div>
+    <div class="live-pulse" style="margin-top:6px;color:var(--muted-dim);"><span id="backend-status">BACKEND · OFFLINE</span></div>
+  </div>
+</aside>
+
+<main>
+
+  <!-- OVERVIEW -->
+  <section class="view active" id="overview">
+    <div class="page-head" style="display:flex;justify-content:space-between;align-items:flex-end;">
+      <div>
+        <div class="eyebrow">Rate Limit Status</div>
+        <h1>Overview</h1>
+        <p class="sub">Live standing across all three models. Bars reset automatically once each window rolls over.</p>
+      </div>
+      <button class="btn-small" id="refresh-usage-btn" onclick="refreshUsage()" style="background:transparent;border:1px solid var(--brass-700);color:var(--brass-400);margin-right:10px;">Refresh Usage</button>
+      <button class="btn-small" onclick="openModal()">+ New Prompt</button>
+    </div>
+
+    <div class="gauge-row" id="gauge-row"></div>
+    <div class="tool-row" id="tool-row"></div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">Recent Activity</div>
+        <div class="panel-count" id="overview-log-count">6 entries</div>
+      </div>
+      <div id="overview-log-body"></div>
+    </div>
+  </section>
+
+  <!-- MODAL: New Prompt / Auto-decompose -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
+      <div class="modal-head">
+        <h2>New Prompt</h2>
+        <div class="modal-close" onclick="closeModal()">✕</div>
+      </div>
+      <div class="modal-body" id="modal-body">
+        <!-- filled by JS: input stage, then plan stage -->
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Add Service -->
+  <div class="modal-overlay" id="add-service-overlay">
+    <div class="modal">
+      <div class="modal-head">
+        <h2>Add a Service</h2>
+        <div class="modal-close" onclick="closeAddServiceModal()">✕</div>
+      </div>
+      <div class="modal-body">
+        <div class="field">
+          <label>Name</label>
+          <input class="prompt-textarea" id="as-name" style="min-height:auto;padding:10px 13px;" placeholder="e.g. Runway, ElevenLabs, OpenRouter">
+        </div>
+        <div class="field">
+          <label>What's it good at?</label>
+          <input class="prompt-textarea" id="as-capability" style="min-height:auto;padding:10px 13px;" placeholder="e.g. Video generation">
+        </div>
+        <div class="field">
+          <label>Category</label>
+          <select id="as-category" onchange="toggleAddServiceFields()" style="width:100%;background:var(--ink-800);border:1px solid var(--line);border-radius:6px;padding:9px 11px;color:var(--brass-300);font-family:'JetBrains Mono',monospace;font-size:12.5px;">
+            <option value="tool">Tool (image/video/audio gen, etc — used for specific tasks)</option>
+            <option value="reasoning">Reasoning model (can handle general prompts, needs an API endpoint)</option>
+          </select>
+        </div>
+        <div id="as-endpoint-fields" style="display:none;">
+          <div class="field">
+            <label>API endpoint (base URL)</label>
+            <input class="prompt-textarea" id="as-baseurl" style="min-height:auto;padding:10px 13px;" placeholder="e.g. https://openrouter.ai/api/v1/chat/completions">
+            <p class="prompt-hint">Must accept the same request shape as OpenAI's /chat/completions — true for most providers (OpenRouter, Together, Fireworks, DeepSeek, etc).</p>
+          </div>
+          <div class="field">
+            <label>Model ID (optional)</label>
+            <input class="prompt-textarea" id="as-model" style="min-height:auto;padding:10px 13px;" placeholder="e.g. meta-llama/llama-3.3-70b">
+          </div>
+        </div>
+        <div class="field">
+          <label>API key (optional — can add later in Settings)</label>
+          <input class="prompt-textarea" id="as-key" type="password" style="min-height:auto;padding:10px 13px;" placeholder="Paste key now, or skip and add it after">
+        </div>
+        <div class="modal-actions">
+          <button class="btn-cancel" onclick="closeAddServiceModal()">Cancel</button>
+          <button class="btn-small btn-decompose" onclick="submitAddService()">Add Service</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOGS -->
+  <section class="view" id="logs">
+    <div class="page-head">
+      <div class="eyebrow">Full History</div>
+      <h1>Log Check</h1>
+      <p class="sub">What each model did, and when. Every completed request lands here.</p>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title" id="log-panel-title">All Entries</div>
+        <div class="panel-count" id="log-count">— entries</div>
+      </div>
+      <div id="log-body"></div>
+    </div>
+  </section>
+
+  <!-- REQUESTS -->
+  <section class="view" id="requests">
+    <div class="page-head">
+      <div class="eyebrow">Inbound</div>
+      <h1>Requests</h1>
+      <p class="sub">Questions or clarifications raised by a model mid-task, and which one asked.</p>
+    </div>
+    <div class="panel" id="requests-panel"></div>
+  </section>
+
+  <!-- TASKS -->
+  <section class="view" id="tasks">
+    <div class="page-head">
+      <div class="eyebrow">In Progress</div>
+      <h1>Tasks</h1>
+      <p class="sub">What's assigned, to which model, and how far along it is.</p>
+    </div>
+    <div class="panel" id="tasks-panel"></div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section class="view" id="settings">
+    <div class="page-head">
+      <div class="eyebrow">Configuration</div>
+      <h1>Settings</h1>
+      <p class="sub">Controls for how TRIAD routes work and reports back.</p>
+    </div>
+    <div class="settings-grid">
+      <div class="field-group">
+        <h3>Routing</h3>
+        <div class="field">
+          <label>Default model for new tasks</label>
+          <select id="routing-default" onchange="setDefaultModel(this.value)" style="width:100%;background:var(--ink-800);border:1px solid var(--line);border-radius:6px;padding:9px 11px;color:var(--brass-300);font-family:'JetBrains Mono',monospace;font-size:12.5px;"></select>
+          <p class="prompt-hint" style="margin-top:6px;">Used when a task doesn't need a specific capability — otherwise TRIAD still matches by capability (3D, music, etc) regardless of this setting.</p>
+        </div>
+        <div class="field">
+          <label>Fallback order when a model is unavailable</label>
+          <div id="routing-fallback"></div>
+          <p class="prompt-hint" style="margin-top:6px;">If the assigned model isn't connected when a task starts, TRIAD reassigns it to the next one here automatically.</p>
+        </div>
+      </div>
+      <div class="field-group" style="grid-column:1 / -1;">
+        <h3>Connected Services</h3>
+        <div class="backend-banner">
+          <b>Heads up:</b> until you paste your Firebase config into the script at the top of this file, keys typed here only live in this browser tab's memory and vanish on refresh. Once configured, Save & Connect calls the real <code>saveApiKey</code> Cloud Function and the key never touches this page again after that.
+        </div>
+        <div id="services-list"></div>
+        <div class="field" style="margin-top:14px;">
+          <button class="btn-small" onclick="openAddServiceModal()">+ Add Another Service</button>
+        </div>
+      </div>
+      <div class="field-group">
+        <h3>Notifications</h3>
+        <div class="field toggle-row"><label style="margin:0">Alert when a model requests input</label><div class="switch on"></div></div>
+        <div class="field toggle-row"><label style="margin:0">Alert at 90% rate limit usage</label><div class="switch on"></div></div>
+        <div class="field toggle-row"><label style="margin:0">Daily summary digest</label><div class="switch"></div></div>
+      </div>
+      <div class="field-group">
+        <h3>Display</h3>
+        <div class="field">
+          <label>Refresh interval</label>
+          <select><option>Real-time (websocket)</option><option>Every 10s</option><option>Every 30s</option></select>
+        </div>
+        <div class="field toggle-row"><label style="margin:0">Show reset countdowns in gauges</label><div class="switch on"></div></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script type="module">
+  // ---------- Firebase init (Firestore + Auth only — free on Spark plan) ----------
+  // Paste the config object from: Firebase Console → your triad-console project →
+  // Project settings (gear icon) → General → Your apps → Web app.
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, collection, onSnapshot, query, orderBy, where, addDoc, updateDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCH902FFk-EYv5OYXXL_C_4ITo6i8uI1BA",
+    authDomain: "triad-40ded.firebaseapp.com",
+    projectId: "triad-40ded",
+    storageBucket: "triad-40ded.firebasestorage.app",
+    messagingSenderId: "187814705002",
+    appId: "1:187814705002:web:71583e0fcbcbd6f39b9713",
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // ---------- Cloudflare Worker (free tier — replaces Firebase Functions,
+  // which required the paid Blaze plan just to make outbound API calls) ----------
+  // After deploying with `wrangler deploy`, paste the *.workers.dev URL it
+  // gives you here, and the same passphrase you set with `wrangler secret put DASHBOARD_TOKEN`.
+  const WORKER_URL = "https://triad-backend.leocedillo.workers.dev";
+  const DASHBOARD_TOKEN = "leo020808";
+
+  async function workerFetch(path, body){
+    const res = await fetch(WORKER_URL + path, {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-triad-token": DASHBOARD_TOKEN },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || `Worker error: ${res.status}`);
+    return data;
+  }
+
+  // Anonymous auth — gives this browser a stable identity for Firestore's
+  // security rules (tasks/logs/requests/settings are scoped to your uid).
+  signInAnonymously(auth).catch((err) => console.error("Auth failed:", err));
+
+  let statusChecked = false;
+  let currentUid = null;
+  onAuthStateChanged(auth, (user) => {
+    window.triadReady = !!user && WORKER_URL !== "PASTE_YOUR_WORKER_URL";
+    currentUid = user ? user.uid : null;
+    const el = document.getElementById('backend-status');
+    if(el){
+      el.textContent = window.triadReady ? 'BACKEND · CONNECTED' : 'BACKEND · OFFLINE';
+      el.parentElement.style.color = window.triadReady ? 'var(--good)' : 'var(--muted-dim)';
+    }
+    if(user) console.log("Signed in:", user.uid);
+
+    // On (re)connect, ask the Worker which services already have a saved
+    // key — this is what makes "Connected" survive a page refresh, since
+    // the key itself lives server-side, not in this page's memory.
+    if(window.triadReady && !statusChecked){
+      statusChecked = true;
+      fetch(WORKER_URL + "/key-status", { headers: { "x-triad-token": DASHBOARD_TOKEN } })
+        .then(res => res.json())
+        .then(data => {
+          (data.services || []).forEach(svc => {
+            if(window.markKeyConnected) window.markKeyConnected(svc);
+          });
+        })
+        .catch(err => console.error("Couldn't load key status:", err));
+
+      if(window.loadStoredUsage) window.loadStoredUsage();
+    }
+
+    // Start real-time Firestore listeners once we have a stable uid — this
+    // is what makes tasks/logs actually sync live instead of living only
+    // in this tab's memory. Both fire immediately with whatever's already
+    // in Firestore, then again every time a doc changes (yours or, in
+    // theory, another tab signed in as the same anon user).
+    if(user && !firestoreListenersStarted){
+      firestoreListenersStarted = true;
+
+      const tasksQuery = query(collection(db, "tasks"), where("uid", "==", user.uid), orderBy("createdAt", "desc"));
+      onSnapshot(tasksQuery, (snap) => {
+        const liveTasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        if(window.onTasksSnapshot) window.onTasksSnapshot(liveTasks);
+      }, (err) => console.error("Tasks listener error:", err));
+
+      const logsQuery = query(collection(db, "logs"), where("uid", "==", user.uid), orderBy("timestamp", "desc"));
+      onSnapshot(logsQuery, (snap) => {
+        const liveLogs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        if(window.onLogsSnapshot) window.onLogsSnapshot(liveLogs);
+      }, (err) => console.error("Logs listener error:", err));
+
+      const requestsQuery = query(collection(db, "requests"), where("uid", "==", user.uid), orderBy("createdAt", "desc"));
+      onSnapshot(requestsQuery, (snap) => {
+        const liveRequests = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        if(window.onRequestsSnapshot) window.onRequestsSnapshot(liveRequests);
+      }, (err) => console.error("Requests listener error:", err));
+    }
+  });
+  let firestoreListenersStarted = false;
+
+  // ---------- Firestore helpers, exposed for the classic script below ----------
+  window.firestoreAddTask = async (data) => {
+    if(!currentUid) throw new Error("Not signed in yet.");
+    const ref = await addDoc(collection(db, "tasks"), { ...data, uid: currentUid, createdAt: serverTimestamp() });
+    return ref.id;
+  };
+  window.firestoreUpdateTask = async (taskId, updates) => {
+    await updateDoc(doc(db, "tasks", taskId), updates);
+  };
+  window.firestoreAddLog = async (data) => {
+    if(!currentUid) throw new Error("Not signed in yet.");
+    await addDoc(collection(db, "logs"), { ...data, uid: currentUid, timestamp: serverTimestamp() });
+  };
+  window.firestoreAddRequest = async (data) => {
+    if(!currentUid) throw new Error("Not signed in yet.");
+    const ref = await addDoc(collection(db, "requests"), { ...data, uid: currentUid, createdAt: serverTimestamp() });
+    return ref.id;
+  };
+  window.firestoreUpdateRequest = async (requestId, updates) => {
+    await updateDoc(doc(db, "requests", requestId), updates);
+  };
+
+  async function workerGet(path){
+    const res = await fetch(WORKER_URL + path, {
+      headers: { "x-triad-token": DASHBOARD_TOKEN },
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || `Worker error: ${res.status}`);
+    return data;
+  }
+
+  // Exposed globally so the existing inline onclick handlers (saveKey, etc.)
+  // in the non-module script below can call these.
+  window.saveApiKeyBackend = async (service, key, baseUrl, model) => {
+    return workerFetch("/save-key", { service, key, baseUrl, model });
+  };
+
+  window.removeKeyBackend = async (service) => {
+    return workerFetch("/remove-key", { service });
+  };
+
+  window.callModelBackend = async (service, prompt, taskId) => {
+    const data = await workerFetch("/call-model", { service, prompt, taskId });
+    return data; // { output, usage }
+  };
+
+  window.getUsageBackend = async () => workerGet("/usage");
+  window.refreshUsageBackend = async () => workerFetch("/refresh-usage", {});
+</script>
+<script>
+
+// ---------- Mock data ----------
+const models = [
+  { id:'claude',   name:'Claude',   swatch:'#e3c383', weight:7,    used:62, limit:100, reset: 14*60, type:'core', capability:'Reasoning & code', hasRealUsage:false, builtin:true },
+  { id:'chatgpt',  name:'ChatGPT',  swatch:'#c9a469', weight:5.25, used:38, limit:100, reset: 42*60, type:'core', capability:'Reasoning & writing', hasRealUsage:false, builtin:true },
+  { id:'gemini',   name:'Gemini',   swatch:'#9c7b45', weight:3.75, used:21, limit:100, reset: 55*60, type:'core', capability:'Reasoning & multimodal', hasRealUsage:false, noHeaders:true, builtin:true },
+  { id:'groq',     name:'Groq',     swatch:'#7a8fa6', weight:5,    used:0,  limit:100, reset: 60*60, type:'core', capability:'Fast open-source models (free)', hasRealUsage:false, builtin:true },
+  { id:'mistral',  name:'Mistral',  swatch:'#a67a8f', weight:4,    used:0,  limit:100, reset: 60*60, type:'core', capability:'Reasoning & code (free)', hasRealUsage:false, noHeaders:true, builtin:true },
+  { id:'workers-ai', name:'Workers AI', swatch:'#8fa67a', weight:3, used:0, limit:100, reset: 60*60, type:'core', capability:'Runs on your Worker (free, no key)', hasRealUsage:false, noHeaders:true, noKeyNeeded:true, builtin:true },
+];
+
+const tools = [
+  { id:'meshy',  name:'Meshy',  swatch:'#6f9c95', type:'tool', capability:'3D asset generation', creditsUsed:340, creditsLimit:1000, builtin:true },
+  { id:'suno',   name:'Suno',   swatch:'#b5806a', type:'tool', capability:'Music & audio generation', creditsUsed:12,  creditsLimit:50, builtin:true },
+];
+
+const registry = () => [...models, ...tools];
+
+const logEntries = [
+  { date:'Jul 17', time:'14:52', model:'claude',  text:'Refactored Firestore security rules for AXIOM tiered access' },
+  { date:'Jul 17', time:'14:38', model:'gemini',  text:'Generated alt-text descriptions for archive entry images' },
+  { date:'Jul 17', time:'14:20', model:'chatgpt', text:'Drafted PvZ wave-6 endless mode balancing pass' },
+  { date:'Jul 17', time:'13:57', model:'claude',  text:'Fixed CFrame drift bug in ZombieAI lane movement' },
+  { date:'Jul 17', time:'13:41', model:'gemini',  text:'Summarized 23 archive entries into clearance-tier index' },
+  { date:'Jul 16', time:'19:05', model:'chatgpt', text:'Wrote unit tests for SunDrop collection RemoteEvent' },
+  { date:'Jul 16', time:'18:48', model:'claude',  text:'Reviewed Axiom Script glyph-mapping for kerning issues' },
+  { date:'Jul 16', time:'18:22', model:'chatgpt', text:'Proposed copy for empty-state on Requests panel' },
+];
+
+const requests = [
+  { id:1, model:'claude',  text:'Need a test account created for the payment sandbox to verify the Stripe webhook flow — can you send credentials?', status:'open', response:null, respondedAt:null, askedAt:'14:52' },
+  { id:2, model:'gemini',  text:'Confirming: archive tier 4 entries should remain locked until Firebase auth role check passes?', status:'complete', response:'Confirmed — tier 4 stays locked behind the role check. Don\'t render content until claims.tier >= 4.', respondedAt:'13:20 · Jul 17', askedAt:'13:05' },
+  { id:3, model:'chatgpt', text:'Endless mode day-6 zombie spawn rate — match PvZ curve exactly or scale to your lane count?', status:'open', response:null, respondedAt:null, askedAt:'12:20' },
+  { id:4, model:'claude',  text:'Firestore rule for settings collection — should this be user-scoped or global-admin only?', status:'responded', response:'User-scoped for now. Each user only reads/writes their own settings doc under /users/{uid}/settings.', respondedAt:'11:48 · Jul 17', askedAt:'11:30' },
+];
+
+let activeFilter = 'all';
+let usingMockTasks = true;
+let usingMockLogs = true;
+let usingMockRequests = true;
+
+const tasks = [
+  { title:'Firestore security rules — final pass', model:'Claude',  pct:82, eta:'~12m' },
+  { title:'PvZ endless mode balancing',            model:'ChatGPT', pct:47, eta:'~40m' },
+  { title:'Archive entry alt-text batch',           model:'Gemini',  pct:95, eta:'~2m'  },
+  { title:'Axiom Script kerning review',            model:'Claude',  pct:23, eta:'~1h 10m' },
+];
+
+const modelById = id => registry().find(m => m.id === id);
+const isConnected = id => {
+  const m = modelById(id);
+  return !!(m && (m.noKeyNeeded || apiKeys[id]));
+};
+
+// ---------- Routing settings ----------
+// defaultModel: 'auto' or a specific model id, used for tasks that don't
+// need a specific capability (decompose() still routes 3D/music by
+// capability regardless of this setting).
+// fallbackOrder: priority list of model ids — if a task's assigned model
+// turns out not to be connected when it's actually started, TRIAD walks
+// this list and reassigns to the first connected one it finds.
+const routingSettings = {
+  defaultModel: 'auto',
+  fallbackOrder: ['claude', 'groq', 'chatgpt', 'gemini', 'mistral', 'workers-ai'],
+};
+
+function setDefaultModel(id){
+  routingSettings.defaultModel = id;
+}
+
+function renderRoutingSettings(){
+  const defaultSelect = document.getElementById('routing-default');
+  const fallbackList = document.getElementById('routing-fallback');
+  if(!defaultSelect || !fallbackList) return;
+
+  const connectedReasoning = models.filter(m => isConnected(m.id));
+
+  // Default model dropdown — only offer models actually connected, plus Auto.
+  defaultSelect.innerHTML = `<option value="auto">Auto (best fit)</option>` +
+    connectedReasoning.map(m => `<option value="${m.id}" ${routingSettings.defaultModel===m.id?'selected':''}>${m.name}</option>`).join('');
+  if(routingSettings.defaultModel !== 'auto' && !connectedReasoning.some(m => m.id === routingSettings.defaultModel)){
+    // The previously-chosen default got disconnected — fall back to Auto rather than pointing at nothing.
+    routingSettings.defaultModel = 'auto';
+    defaultSelect.value = 'auto';
+  }
+
+  // Fallback list — only connected models, in current priority order, with up/down reordering.
+  routingSettings.fallbackOrder = routingSettings.fallbackOrder.filter(id => connectedReasoning.some(m => m.id === id));
+  connectedReasoning.forEach(m => { if(!routingSettings.fallbackOrder.includes(m.id)) routingSettings.fallbackOrder.push(m.id); });
+
+  if(routingSettings.fallbackOrder.length === 0){
+    fallbackList.innerHTML = `<div class="fallback-empty">Connect a reasoning model in Settings below to set a fallback order.</div>`;
+    return;
+  }
+
+  fallbackList.innerHTML = routingSettings.fallbackOrder.map((id, i) => {
+    const m = modelById(id);
+    if(!m) return '';
+    return `
+    <div class="fallback-row">
+      <span class="fallback-rank">#${i+1}</span>
+      <span class="fallback-name"><span class="swatch" style="width:7px;height:7px;border-radius:50%;background:${m.swatch};display:inline-block;"></span>${m.name}</span>
+      <div class="fallback-btns">
+        <button class="fallback-btn" onclick="moveFallback(${i},-1)" ${i===0?'disabled':''}>↑</button>
+        <button class="fallback-btn" onclick="moveFallback(${i},1)" ${i===routingSettings.fallbackOrder.length-1?'disabled':''}>↓</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function moveFallback(index, dir){
+  const arr = routingSettings.fallbackOrder;
+  const target = index + dir;
+  if(target < 0 || target >= arr.length) return;
+  [arr[index], arr[target]] = [arr[target], arr[index]];
+  renderRoutingSettings();
+}
+
+// Given a proposed model id, returns the first connected model starting
+// from that point in the fallback order — used right before a task
+// actually kicks off, so a stale assignment doesn't silently fail.
+function resolveModelForTask(proposedId){
+  if(isConnected(proposedId)) return proposedId;
+  const order = routingSettings.fallbackOrder;
+  const fallback = order.find(id => isConnected(id));
+  return fallback || proposedId; // nothing connected — caller will surface the error
+}
+
+// ---------- Gauges ----------
+function gaugeSVG(pct, color){
+  const r = 60, c = 2*Math.PI*r;
+  const offset = c - (pct/100)*c;
+  return `<svg class="gauge-svg" viewBox="0 0 150 150">
+    <circle cx="75" cy="75" r="${r}" fill="none" stroke="#241f18" stroke-width="9"/>
+    <circle cx="75" cy="75" r="${r}" fill="none" stroke="${color}" stroke-width="9"
+      stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${offset}"
+      transform="rotate(-90 75 75)" style="transition:stroke-dashoffset .6s ease"/>
+  </svg>`;
+}
+
+function fmtCountdown(sec){
+  const m = Math.floor(sec/60), s = sec%60;
+  return `${m}m ${s.toString().padStart(2,'0')}s`;
+}
+
+function renderTools(){
+  const row = document.getElementById('tool-row');
+  if(!row) return;
+  const connected = tools.filter(t => isConnected(t.id));
+  if(connected.length === 0){
+    row.innerHTML = `<div style="grid-column:1/-1;padding:16px;border:1px dashed var(--line);border-radius:10px;color:var(--muted-dim);font-family:'JetBrains Mono',monospace;font-size:11.5px;text-align:center;">No tools connected yet — add a key for Meshy or Suno in Settings to see it here.</div>`;
+    return;
+  }
+  row.innerHTML = connected.map(t => {
+    const pct = Math.round((t.creditsUsed / t.creditsLimit) * 100);
+    return `
+    <div class="tool-card">
+      <div class="tool-card-top">
+        <div class="tool-card-name"><span class="swatch" style="background:${t.swatch}"></span>${t.name}</div>
+        <div class="tool-card-cap">${t.capability}</div>
+      </div>
+      <div class="tool-bar-track"><div class="tool-bar-fill" style="width:${pct}%;background:${t.swatch}"></div></div>
+      <div class="tool-card-meta"><span>${t.creditsUsed}/${t.creditsLimit} credits used</span><span>${100-pct}% left</span></div>
+    </div>`;
+  }).join('');
+}
+
+function renderGauges(){
+  const row = document.getElementById('gauge-row');
+  // Only show models that are both connected AND capable of exposing real
+  // usage data. noHeaders services (Gemini, Mistral, Workers AI) are
+  // connected and usable — they just don't belong on a page about tracking
+  // usage, since there's nothing here to track for them.
+  const connected = models.filter(m => isConnected(m.id) && !m.noHeaders);
+  if(connected.length === 0){
+    const anyTrackable = models.some(m => !m.noHeaders);
+    row.innerHTML = `<div style="grid-column:1/-1;padding:20px;border:1px dashed var(--line);border-radius:10px;color:var(--muted-dim);font-family:'JetBrains Mono',monospace;font-size:11.5px;text-align:center;">${anyTrackable ? 'No trackable models connected yet — add a key for Claude, ChatGPT, or Groq in Settings.' : 'Nothing here can expose real usage data yet.'}</div>`;
+    return;
+  }
+  row.innerHTML = connected.map(m => {
+    const remaining = 100 - Math.round((m.used/m.limit)*100);
+    const badge = m.hasRealUsage
+      ? `<span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--good);border:1px solid var(--good);border-radius:10px;padding:1px 6px;margin-left:6px;">LIVE</span>`
+      : `<span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted-dim);border:1px solid var(--line);border-radius:10px;padding:1px 6px;margin-left:6px;">MOCK</span>`;
+    return `
+    <div class="gauge-card">
+      <div class="gauge-model"><span class="swatch" style="background:${m.swatch}"></span>${m.name}${badge}</div>
+      <div style="position:relative;display:flex;align-items:center;justify-content:center;">
+        ${gaugeSVG(remaining, m.swatch)}
+        <div style="position:absolute;display:flex;flex-direction:column;align-items:center;">
+          <div class="gauge-pct">${remaining}%</div>
+          <div class="gauge-label">remaining</div>
+        </div>
+      </div>
+      <div class="gauge-meta">
+        <span>${m.used}/${m.limit} used</span>
+        <span id="reset-${m.id}">${m.hasRealUsage ? (m.checkedAt ? 'checked ' + timeSince(m.checkedAt) : 'live') : 'resets ' + fmtCountdown(m.reset)}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function timeSince(iso){
+  const secs = Math.max(0, Math.round((Date.now() - new Date(iso).getTime())/1000));
+  if(secs < 60) return `${secs}s ago`;
+  return `${Math.round(secs/60)}m ago`;
+}
+
+async function refreshUsage(){
+  const btn = document.getElementById('refresh-usage-btn');
+  if(!window.triadReady){
+    alert("Backend isn't connected yet — check WORKER_URL/DASHBOARD_TOKEN and your Firebase config.");
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = 'Checking…';
+  try{
+    const data = await window.refreshUsageBackend();
+    Object.entries(data.usage || {}).forEach(([svc, u]) => {
+      const m = models.find(x => x.id === svc);
+      if(!m || !u) return;
+      if(u.error || u.unavailable){ return; } // leave as-is, e.g. no key saved or Gemini
+      m.used = u.used;
+      m.limit = u.limit;
+      m.hasRealUsage = true;
+      m.checkedAt = u.checkedAt || new Date().toISOString();
+      if(u.resetsAt) m.resetsAtReal = u.resetsAt;
+    });
+    renderGauges();
+  } catch(err){
+    alert(`Couldn't refresh usage: ${err.message}`);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Refresh Usage';
+  }
+}
+
+async function loadStoredUsage(){
+  // Free — just reads whatever was last captured, no API calls made.
+  if(!window.getUsageBackend) return;
+  try{
+    const data = await window.getUsageBackend();
+    Object.entries(data.usage || {}).forEach(([svc, u]) => {
+      const m = models.find(x => x.id === svc);
+      if(!m || !u) return;
+      m.used = u.used;
+      m.limit = u.limit;
+      m.hasRealUsage = true;
+      m.checkedAt = u.checkedAt;
+    });
+    renderGauges();
+  } catch(err){
+    console.error("Couldn't load stored usage:", err);
+  }
+}
+
+// ---------- Logs ----------
+function tagHTML(id){
+  const m = modelById(id);
+  return `<span class="tag"><span class="swatch" style="background:${m.swatch}"></span>${m.name}</span>`;
+}
+
+function renderLogs(){
+  const titleEl = document.getElementById('log-panel-title');
+  if(titleEl) titleEl.textContent = usingMockLogs ? 'Demo Data' : 'All Entries';
+  const rows = logEntries.map(e => `
+    <div class="log-row">
+      <div class="log-date">${e.date}</div>
+      <div class="log-time">${e.time}</div>
+      ${tagHTML(e.model)}
+      <div class="log-text">${escapeHtml(e.text)}</div>
+    </div>`).join('');
+  document.getElementById('log-body').innerHTML = rows;
+  document.getElementById('overview-log-body').innerHTML = logEntries.slice(0,6).map(e => `
+    <div class="log-row">
+      <div class="log-date">${e.date}</div>
+      <div class="log-time">${e.time}</div>
+      ${tagHTML(e.model)}
+      <div class="log-text">${escapeHtml(e.text)}</div>
+    </div>`).join('');
+  document.getElementById('log-count').textContent = `${logEntries.length} entries`;
+}
+
+// ---------- Requests ----------
+function renderRequests(){
+  const panel = document.getElementById('requests-panel');
+  const filtered = activeFilter === 'all' ? requests : requests.filter(r => r.status === activeFilter);
+  const counts = {
+    all: requests.length,
+    open: requests.filter(r=>r.status==='open').length,
+    responded: requests.filter(r=>r.status==='responded').length,
+    complete: requests.filter(r=>r.status==='complete').length,
+  };
+
+  const filterBtn = (key,label) => `<div class="req-filter ${activeFilter===key?'active':''}" data-filter="${key}">${label} · ${counts[key]}</div>`;
+
+  panel.innerHTML = `
+    <div class="panel-head">
+      <div class="panel-title">${usingMockRequests ? 'Demo Data' : 'Awaiting or Resolved'}</div>
+      <div class="panel-count">${requests.length} total</div>
+    </div>
+    <div class="req-filters">
+      ${filterBtn('all','All')}
+      ${filterBtn('open','Open')}
+      ${filterBtn('responded','Responded')}
+      ${filterBtn('complete','Complete')}
+    </div>
+    <div id="req-list">
+      ${filtered.map(r => reqCardHTML(r)).join('') || `<div style="padding:30px 20px;color:var(--muted);font-size:13px;">Nothing here.</div>`}
+    </div>
+  `;
+
+  panel.querySelectorAll('.req-filter').forEach(f => {
+    f.addEventListener('click', () => { activeFilter = f.dataset.filter; renderRequests(); });
+  });
+
+  panel.querySelectorAll('.req-head').forEach(h => {
+    h.addEventListener('click', () => {
+      const card = h.closest('.req-card');
+      card.classList.toggle('expanded');
+    });
+  });
+
+  panel.querySelectorAll('.req-btn-send').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const id = btn.dataset.id; // string — Firestore doc ids aren't numeric
+      const req = requests.find(r => String(r.id) === id);
+      const textarea = document.getElementById(`req-input-${id}`);
+      if(!textarea.value.trim()) return;
+      const response = textarea.value.trim();
+      const respondedAt = 'Just now';
+
+      btn.disabled = true;
+      btn.textContent = 'Sending…';
+
+      if(usingMockRequests || !window.firestoreUpdateRequest){
+        // Demo data — no real doc to write to, just reflect it locally.
+        req.response = response; req.status = 'responded'; req.respondedAt = respondedAt;
+        renderRequests();
+      } else {
+        try{
+          await window.firestoreUpdateRequest(id, { response, status:'responded', respondedAt });
+          // No local mutation needed — the real-time listener will re-render
+          // with the updated doc the moment Firestore confirms the write.
+        } catch(err){
+          alert(`Couldn't send response: ${err.message}`);
+          btn.disabled = false;
+          btn.textContent = 'Send Response';
+        }
+      }
+    });
+  });
+
+  panel.querySelectorAll('.req-btn-complete').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const id = btn.dataset.id;
+      const req = requests.find(r => String(r.id) === id);
+
+      btn.disabled = true;
+      btn.textContent = 'Marking complete…';
+
+      if(usingMockRequests || !window.firestoreUpdateRequest){
+        req.status = 'complete';
+        renderRequests();
+        return;
+      }
+
+      try{
+        await window.firestoreUpdateRequest(id, { status:'complete' });
+
+        // If this request is tied to a blocked task, resume it now — feed
+        // the model back its own question plus your answer, so it has full
+        // context to actually finish rather than starting over blind.
+        if(req.taskId && req.originalPrompt){
+          btn.textContent = 'Resuming task…';
+          const resumedPrompt = `${req.originalPrompt}\n\n---\nYou previously asked: "${req.text}"\nThe user's answer: "${req.response}"\n\nContinue and complete the original task using this information.`;
+          await runTaskStep(req.taskId, req.model, resumedPrompt, req.originalPrompt);
+        }
+      } catch(err){
+        alert(`Couldn't complete this: ${err.message}`);
+        btn.disabled = false;
+        btn.textContent = `Mark Complete & Notify ${modelById(req.model).name}`;
+      }
+    });
+  });
+}
+
+window.onRequestsSnapshot = function(liveRequests){
+  usingMockRequests = false;
+  requests.length = 0;
+  liveRequests.forEach(r => requests.push(r));
+  renderRequests();
+};
+
+function reqCardHTML(r){
+  const statusLabel = { open:'Awaiting you', responded:'Sent · notify pending', complete:'Complete' };
+  return `
+  <div class="req-card" data-id="${r.id}">
+    <div class="req-head">
+      ${tagHTML(r.model)}
+      <div class="req-text">${escapeHtml(r.text)}</div>
+      <div class="req-status-badge ${r.status}">${statusLabel[r.status]}</div>
+      <div class="req-chevron">▾</div>
+    </div>
+    <div class="req-body">
+      <div class="req-body-inner">
+        ${r.response ? `
+          <div class="req-response-existing">
+            <span class="label">Your response · ${r.respondedAt}</span>
+            ${escapeHtml(r.response)}
+          </div>
+        ` : ''}
+
+        ${r.status === 'open' ? `
+          <textarea class="req-textarea" id="req-input-${r.id}" placeholder="Type your response — account details, a decision, whatever it needs..."></textarea>
+          <div class="req-actions">
+            <button class="req-btn req-btn-send" data-id="${r.id}">Send Response</button>
+          </div>
+        ` : ''}
+
+        ${r.status === 'responded' ? `
+          <div class="req-actions">
+            <button class="req-btn req-btn-complete" data-id="${r.id}">Mark Complete &amp; Notify ${modelById(r.model).name}</button>
+          </div>
+          <div class="req-timestamp">Asked at ${r.askedAt} · model will see this response on its next check-in</div>
+        ` : ''}
+
+        ${r.status === 'complete' ? `
+          <div class="req-timestamp">Resolved and acknowledged · asked at ${r.askedAt}</div>
+        ` : ''}
+      </div>
+    </div>
+  </div>`;
+}
+
+// ---------- Tasks ----------
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str == null ? '' : String(str);
+  return div.innerHTML;
+}
+
+let expandedTaskIds = new Set();
+
+function renderTasks(){
+  const panel = document.getElementById('tasks-panel');
+  const statusColor = { queued:'var(--muted)', running:'var(--warn)', complete:'var(--good)', error:'var(--crit)', blocked:'var(--warn)' };
+  const statusLabel = { queued:'Queued', running:'Running…', complete:'Complete', error:'Failed', blocked:'Awaiting your input' };
+  panel.innerHTML = `<div class="panel-head"><div class="panel-title">${usingMockTasks ? 'Demo Data' : 'Your Tasks'}</div><div class="panel-count">${tasks.length} total</div></div>` +
+    (tasks.length === 0
+      ? `<div style="padding:30px 20px;color:var(--muted);font-size:13px;">No tasks yet — try + New Prompt on Overview.</div>`
+      : tasks.map(t => {
+        const status = t.status || 'complete'; // mock entries have no status, treat as done for display
+        const hasOutput = !!(t.output && t.output.trim());
+        const isExpanded = expandedTaskIds.has(t.id);
+        return `
+        <div class="task-card">
+          <div class="task-top">
+            <div class="task-title">${escapeHtml(t.title)}</div>
+            <div class="task-pct" style="color:${statusColor[status] || 'var(--brass-500)'}">${t.pct}%</div>
+          </div>
+          <div class="bar-track"><div class="bar-fill" style="width:${t.pct}%;${status==='error' ? 'background:var(--crit);' : ''}"></div></div>
+          <div class="task-meta">
+            <span>${t.model}</span>
+            <span style="color:${statusColor[status] || 'var(--muted)'}">${statusLabel[status] || ''}</span>
+            ${hasOutput ? `<span class="task-view-output" data-task-id="${t.id}">${isExpanded ? 'Hide output' : 'View output'}</span>` : ''}
+          </div>
+          ${t.error ? `<div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--crit);margin-top:8px;">${escapeHtml(t.error)}</div>` : ''}
+          ${hasOutput ? `
+            <div class="task-output ${isExpanded ? 'expanded' : ''}" id="task-output-${t.id}">
+              <div class="task-output-inner">${escapeHtml(t.output)}</div>
+              <button class="task-copy-btn" data-copy-id="${t.id}">Copy</button>
+            </div>
+          ` : ''}
+        </div>`;
+      }).join(''));
+
+  panel.querySelectorAll('.task-view-output').forEach(el => {
+    el.addEventListener('click', () => {
+      const id = el.dataset.taskId;
+      if(expandedTaskIds.has(id)) expandedTaskIds.delete(id); else expandedTaskIds.add(id);
+      renderTasks();
+    });
+  });
+
+  panel.querySelectorAll('.task-copy-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const t = tasks.find(x => String(x.id) === String(btn.dataset.copyId));
+      if(!t) return;
+      navigator.clipboard.writeText(t.output || '').then(() => {
+        const original = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = original; }, 1500);
+      }).catch(() => alert('Could not copy — your browser may be blocking clipboard access.'));
+    });
+  });
+}
+
+// ---------- Real-time Firestore data taking over from mock ----------
+// The moment a real snapshot arrives (even an empty one, meaning "you have
+// zero real tasks yet"), it fully replaces the mock array — no mixing.
+window.onTasksSnapshot = function(liveTasks){
+  usingMockTasks = false;
+  tasks.length = 0;
+  liveTasks.forEach(t => tasks.push(t));
+  renderTasks();
+};
+
+window.onLogsSnapshot = function(liveLogs){
+  usingMockLogs = false;
+  logEntries.length = 0;
+  liveLogs.forEach(l => {
+    const ts = l.timestamp && l.timestamp.toDate ? l.timestamp.toDate() : new Date();
+    logEntries.push({
+      date: ts.toLocaleDateString(undefined, { month:'short', day:'numeric' }),
+      time: ts.toTimeString().slice(0,5),
+      model: l.model,
+      text: l.text,
+    });
+  });
+  renderLogs();
+};
+
+// ---------- Nav switching ----------
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    if(!item.dataset.view) return; // e.g. the Documentation link — let it navigate normally
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    item.classList.add('active');
+    document.getElementById(item.dataset.view).classList.add('active');
+  });
+});
+
+// ---------- Mock live ticking (demo only — real build wires this to Cloud Functions) ----------
+setInterval(() => {
+  models.forEach(m => {
+    m.reset = m.reset > 0 ? m.reset - 1 : 3600;
+    const el = document.getElementById(`reset-${m.id}`);
+    if(el) el.textContent = `resets ${fmtCountdown(m.reset)}`;
+  });
+}, 1000);
+
+// ---------- New Prompt / Auto-decompose ----------
+let currentPlan = [];
+
+function openModal(){
+  document.getElementById('modal-overlay').classList.add('open');
+  renderModalInput();
+}
+function closeModal(){
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+function renderModalInput(){
+  document.getElementById('modal-body').innerHTML = `
+    <label>What do you need done?</label>
+    <textarea class="prompt-textarea" id="prompt-input" placeholder="e.g. help me build a website for my photography portfolio"></textarea>
+    <p class="prompt-hint">You don't need to say which service does what — TRIAD reads this and splits it into pieces, matched by capability across everything you've connected (reasoning models, Meshy, Suno, anything else). You'll get a plan to glance at before anything runs.</p>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-small btn-decompose" id="decompose-btn" onclick="runDecompose()">Break It Down</button>
+    </div>
+  `;
+}
+
+function runDecompose(){
+  const val = document.getElementById('prompt-input').value.trim();
+  if(!val) return;
+  const btn = document.getElementById('decompose-btn');
+  btn.innerHTML = `<span class="spinner"></span> Reading request...`;
+  btn.disabled = true;
+
+  setTimeout(() => {
+    currentPlan = decompose(val);
+    renderModalPlan(val);
+  }, 950);
+}
+
+// Mock orchestrator: in the real build this call itself goes to a model (e.g. Claude)
+// with the full registry (name + capability of every connected service) in its system
+// prompt, and it returns this exact shape — subtasks, assigned service, and why.
+function decompose(prompt){
+  const p = prompt.toLowerCase();
+  const plan = [];
+
+  const wants3D = /3d|model(?:ing)?|mesh|asset|character|prop|blender/.test(p);
+  const wantsMusic = /song|music|theme|soundtrack|audio|jingle|score/.test(p);
+
+  // Capability-specific tools (Meshy/Suno) still route by capability
+  // regardless of the default-model setting — a reasoning model can't
+  // substitute for text-to-3D or text-to-music, so these never fall back
+  // to one even if disconnected; they just get flagged instead.
+  if(wants3D){
+    const connected = isConnected('meshy');
+    plan.push({
+      title: `Generate 3D asset for: ${prompt}`,
+      model: 'meshy',
+      why: connected
+        ? 'Matched by capability — Meshy specializes in text-to-3D asset generation, none of the reasoning models can output geometry.'
+        : 'Matched by capability, but Meshy isn\'t connected yet — add a key in Settings before this step can actually run.',
+    });
+  }
+  if(wantsMusic){
+    const connected = isConnected('suno');
+    plan.push({
+      title: `Generate audio/theme for: ${prompt}`,
+      model: 'suno',
+      why: connected
+        ? 'Matched by capability — Suno specializes in music generation, routed here instead of a text model.'
+        : 'Matched by capability, but Suno isn\'t connected yet — add a key in Settings before this step can actually run.',
+    });
+  }
+
+  // For the reasoning pass(es), a chosen default model overrides the usual
+  // capability-based split — if you've told Settings "always use Groq,"
+  // that's what shows up here instead of the default claude/gemini/chatgpt split.
+  const usingDefault = routingSettings.defaultModel !== 'auto';
+  const defaultChoice = usingDefault ? resolveModelForTask(routingSettings.defaultModel) : null;
+  const defaultName = usingDefault ? modelById(defaultChoice)?.name : null;
+
+  if(wants3D || wantsMusic){
+    plan.push({
+      title: `Integrate & write supporting content for: ${prompt}`,
+      model: usingDefault ? defaultChoice : resolveModelForTask('claude'),
+      why: usingDefault
+        ? `Using your default model (${defaultName}) — set in Settings → Routing.`
+        : 'Handles the surrounding build — wiring the generated asset in, writing any copy around it.',
+    });
+  } else if(usingDefault){
+    plan.push({
+      title: `${prompt}`,
+      model: defaultChoice,
+      why: `Using your default model (${defaultName}) — set in Settings → Routing. Switch it back to Auto to get a capability-based split instead.`,
+    });
+  } else {
+    plan.push(
+      { title: `Scope & structure: ${prompt}`, model: resolveModelForTask('gemini'), why: 'Turns a loose request into a concrete outline before anything gets built.' },
+      { title: `Core build for: ${prompt}`, model: resolveModelForTask('claude'), why: 'Handles the actual implementation — strongest fit for structured, correct code.' },
+      { title: `Review & catch edge cases`, model: resolveModelForTask('chatgpt'), why: 'Fresh second pass over the build — flags what the builder missed.' },
+    );
+  }
+
+  return plan;
+}
+
+function renderModalPlan(originalPrompt){
+  document.getElementById('modal-body').innerHTML = `
+    <div class="plan-header">✓ Split into ${currentPlan.length} pieces — review before starting</div>
+    ${currentPlan.map((p, i) => `
+      <div class="plan-item">
+        <div class="plan-item-top">
+          <div class="plan-item-title">${p.title}</div>
+          <select class="model-select" onchange="reassign(${i}, this.value)">
+            <optgroup label="Reasoning">
+              <option value="claude" ${p.model==='claude'?'selected':''}>Claude</option>
+              <option value="chatgpt" ${p.model==='chatgpt'?'selected':''}>ChatGPT</option>
+              <option value="gemini" ${p.model==='gemini'?'selected':''}>Gemini</option>
+              <option value="groq" ${p.model==='groq'?'selected':''}>Groq (free)</option>
+              <option value="mistral" ${p.model==='mistral'?'selected':''}>Mistral (free)</option>
+              <option value="workers-ai" ${p.model==='workers-ai'?'selected':''}>Workers AI (free)</option>
+            </optgroup>
+            <optgroup label="Tools">
+              <option value="meshy" ${p.model==='meshy'?'selected':''}>Meshy</option>
+              <option value="suno" ${p.model==='suno'?'selected':''}>Suno</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="plan-item-why">${p.why}</div>
+        ${i > 0 ? `<div class="plan-deps">runs after step ${i}</div>` : `<div class="plan-deps">starts immediately</div>`}
+      </div>
+    `).join('')}
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="renderModalInput()">← Back</button>
+      <button class="btn-small btn-decompose" onclick="confirmPlan()">Confirm & Start</button>
+    </div>
+  `;
+}
+
+function reassign(index, modelId){
+  currentPlan[index].model = modelId;
+}
+
+// Runs one step against the real backend, handling all three outcomes:
+// success (task completes), the model asking for input (task goes 'blocked'
+// and a real Request gets created), or an error. Shared between confirmPlan
+// and resumeTaskFromRequest, since "run this prompt against this model and
+// react to what comes back" is the same operation either way.
+async function runTaskStep(taskId, modelId, promptText, title){
+  const modelName = modelById(modelId)?.name || modelId;
+  try{
+    await window.firestoreUpdateTask(taskId, { status:'running', pct:10 });
+    const result = await window.callModelBackend(modelId, promptText, taskId);
+
+    if(result.needsInput){
+      await window.firestoreUpdateTask(taskId, { status:'blocked', pct:10 });
+      await window.firestoreAddRequest({
+        model: modelId,
+        text: result.question || 'Needs input before continuing.',
+        status: 'open',
+        response: null,
+        respondedAt: null,
+        askedAt: new Date().toTimeString().slice(0,5),
+        taskId,
+        originalPrompt: promptText,
+      });
+      await window.firestoreAddLog({ model: modelId, text: `Needs input: ${title} — “${result.question}”` }).catch(()=>{});
+      return;
+    }
+
+    await window.firestoreUpdateTask(taskId, { status:'complete', pct:100, output: result.output || '' });
+    const preview = (result.output || '').slice(0, 140).replace(/\s+/g,' ').trim();
+    await window.firestoreAddLog({ model: modelId, text: `Completed: ${title}${preview ? ' — “' + preview + (result.output.length > 140 ? '…' : '') + '”' : ''}` });
+  } catch(err){
+    await window.firestoreUpdateTask(taskId, { status:'error', pct:10, error: err.message });
+    await window.firestoreAddLog({ model: modelId, text: `Failed: ${title} — ${err.message}` }).catch(()=>{});
+  }
+}
+
+async function confirmPlan(){
+  if(!window.triadReady){
+    alert("Backend isn't connected yet — tasks need Firebase + the Worker both configured to actually run. Check Settings.");
+    return;
+  }
+
+  const plan = currentPlan.slice(); // freeze the list before we start mutating UI state
+  closeModal();
+
+  // Jump to Tasks now — real-time listeners will populate cards as each
+  // Firestore write lands, so this isn't optimistic UI, it's just fast.
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelector('.nav-item[data-view="tasks"]').classList.add('active');
+  document.getElementById('tasks').classList.add('active');
+
+  // Steps run in plan order, one at a time — matches the "runs after step N"
+  // dependency labels shown in the plan review, and keeps things simple:
+  // no need to reason about which steps could safely run in parallel.
+  for(const p of plan){
+    const modelName = modelById(p.model)?.name || p.model;
+    let taskId;
+    try{
+      taskId = await window.firestoreAddTask({ title: p.title, model: modelName, pct: 0, status: 'queued' });
+    } catch(err){
+      console.error("Couldn't create task:", err);
+      continue; // move on rather than aborting the whole plan over one write failure
+    }
+
+    if(!isConnected(p.model)){
+      await window.firestoreUpdateTask(taskId, { status:'error', pct:0, error:`${modelName} isn't connected — add a key in Settings.` });
+      await window.firestoreAddLog({ model: p.model, text: `Skipped: ${p.title} — ${modelName} not connected` }).catch(()=>{});
+      continue;
+    }
+
+    await runTaskStep(taskId, p.model, p.title, p.title);
+  }
+}
+
+document.getElementById('modal-overlay').addEventListener('click', (e) => {
+  if(e.target.id === 'modal-overlay') closeModal();
+});
+
+document.getElementById('add-service-overlay').addEventListener('click', (e) => {
+  if(e.target.id === 'add-service-overlay') closeAddServiceModal();
+});
+
+// ---------- Settings: Connected Services + API keys ----------
+// apiKeys only ever holds either the value you just typed (briefly, right
+// after hitting Save, purely for the masked preview) or `true` once we've
+// confirmed via /key-status that a key exists server-side. The real key
+// itself lives only in Cloudflare KV — this object is never the source of
+// truth, just a local "is it connected" flag.
+const apiKeys = {};
+
+window.markKeyConnected = function(serviceId){
+  apiKeys[serviceId] = true;
+  renderServices();
+  renderGauges();
+  renderTools();
+  renderRoutingSettings();
+};
+
+function maskKey(key){
+  if(typeof key !== 'string') return '•••• saved on backend';
+  if(key.length <= 8) return '••••••••';
+  return key.slice(0,4) + '••••••••••••' + key.slice(-4);
+}
+
+// Built-ins you don't use can be tucked away here — purely a display
+// preference, doesn't touch the underlying registry or any saved key.
+// A hidden service stays fully functional (still usable in New Prompt,
+// still routable) — it just doesn't clutter this list.
+const hiddenServices = new Set();
+let showHiddenServices = false;
+
+function hideService(id){
+  hiddenServices.add(id);
+  renderServices();
+}
+function unhideService(id){
+  hiddenServices.delete(id);
+  renderServices();
+}
+function toggleHiddenSection(){
+  showHiddenServices = !showHiddenServices;
+  renderServices();
+}
+
+function renderServices(){
+  const list = document.getElementById('services-list');
+  if(!list) return;
+
+  const visible = registry().filter(s => !hiddenServices.has(s.id));
+  const hidden = registry().filter(s => hiddenServices.has(s.id));
+
+  const serviceRowHTML = s => {
+    const saved = s.noKeyNeeded ? true : apiKeys[s.id];
+    return `
+    <div class="service-row">
+      <span class="service-swatch" style="background:${s.swatch}"></span>
+      <div>
+        <div class="service-name-row">
+          <span class="service-name">${s.name}</span>
+          <span class="service-type-badge">${s.type}</span>
+          ${!s.builtin ? `<span class="service-type-badge" style="color:var(--brass-500);border-color:var(--brass-700);">custom</span>` : ''}
+        </div>
+        <span class="service-cap">${s.capability}</span>
+        ${s.noKeyNeeded
+          ? `<div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted-dim);display:flex;justify-content:space-between;align-items:center;gap:10px;">
+              <span>Enabled via Cloudflare AI binding — nothing to paste here.</span>
+              <button class="key-btn key-btn-edit" onclick="hideService('${s.id}')">Hide</button>
+            </div>`
+          : `<div class="key-row">
+              ${saved
+                ? `<input class="key-input" value="${maskKey(saved)}" readonly>
+                   <button class="key-btn key-btn-edit" onclick="editKey('${s.id}')">Change</button>
+                   <button class="key-btn key-btn-edit" style="color:var(--crit);border-color:var(--crit);" onclick="removeKey('${s.id}')">Remove</button>
+                   ${s.builtin ? `<button class="key-btn key-btn-edit" onclick="hideService('${s.id}')">Hide</button>` : ''}`
+                : `<input class="key-input" id="key-input-${s.id}" type="password" placeholder="Paste ${s.name} API key">
+                   <button class="key-btn key-btn-save" onclick="saveKey('${s.id}')">Save & Connect</button>
+                   ${!s.builtin ? `<button class="key-btn key-btn-edit" style="color:var(--crit);border-color:var(--crit);" onclick="deleteCustomService('${s.id}')">Delete</button>` : ''}
+                   ${s.builtin ? `<button class="key-btn key-btn-edit" onclick="hideService('${s.id}')">Hide</button>` : ''}`
+              }
+            </div>`
+        }
+      </div>
+      <div class="conn-status ${saved?'on':'off'}"><span class="conn-dot"></span>${saved?'Connected':'Not connected'}</div>
+    </div>`;
+  };
+
+  let html = visible.map(serviceRowHTML).join('');
+
+  if(hidden.length > 0){
+    html += `
+    <div style="padding:12px 0 4px;">
+      <button class="btn-cancel" onclick="toggleHiddenSection()" style="font-size:11px;">
+        ${showHiddenServices ? '▾' : '▸'} ${hidden.length} hidden service${hidden.length>1?'s':''}
+      </button>
+    </div>`;
+    if(showHiddenServices){
+      html += hidden.map(s => `
+        <div class="service-row" style="opacity:0.55;">
+          <span class="service-swatch" style="background:${s.swatch}"></span>
+          <div>
+            <div class="service-name-row"><span class="service-name">${s.name}</span></div>
+            <span class="service-cap">${s.capability}</span>
+          </div>
+          <button class="key-btn key-btn-edit" onclick="unhideService('${s.id}')">Unhide</button>
+        </div>`).join('');
+    }
+  }
+
+  list.innerHTML = html;
+}
+
+function saveKey(id){
+  const input = document.getElementById(`key-input-${id}`);
+  const val = input.value.trim();
+  if(!val) return;
+  const svc = modelById(id);
+  const extra = svc && !svc.builtin ? [svc.baseUrl, svc.modelId] : [];
+
+  const applyLocally = () => { apiKeys[id] = val; renderServices(); renderGauges(); renderTools(); renderRoutingSettings(); };
+
+  if(window.saveApiKeyBackend && window.triadReady){
+    window.saveApiKeyBackend(id, val, ...extra)
+      .then(applyLocally)
+      .catch(err => alert(`Couldn't save key: ${err.message}`));
+  } else {
+    console.warn('Backend not connected yet — saving locally only, for this tab, until refresh.');
+    applyLocally();
+  }
+}
+
+function editKey(id){
+  // "Change" — clear locally so the input reappears for re-entry. The old
+  // key server-side stays put until a new one is actually saved over it.
+  delete apiKeys[id];
+  renderServices();
+  renderGauges();
+  renderTools();
+  renderRoutingSettings();
+}
+
+function removeKey(id){
+  const svc = modelById(id);
+  if(!confirm(`Remove the saved key for ${svc ? svc.name : id}? This deletes it from the backend — you'll need to paste it again to reconnect.`)) return;
+
+  const applyLocally = () => {
+    delete apiKeys[id];
+    renderServices();
+    renderGauges();
+    renderTools();
+    renderRoutingSettings();
+  };
+
+  if(window.removeKeyBackend && window.triadReady){
+    window.removeKeyBackend(id).then(applyLocally).catch(err => alert(`Couldn't remove key: ${err.message}`));
+  } else {
+    applyLocally();
+  }
+}
+
+function deleteCustomService(id){
+  const svc = modelById(id);
+  if(!svc || svc.builtin) return;
+  if(!confirm(`Delete ${svc.name} entirely? This removes it from TRIAD's list, not just disconnects it.`)) return;
+
+  const removeFromArray = arr => { const i = arr.findIndex(x => x.id === id); if(i > -1) arr.splice(i,1); };
+  removeFromArray(models);
+  removeFromArray(tools);
+  delete apiKeys[id];
+  routingSettings.fallbackOrder = routingSettings.fallbackOrder.filter(fid => fid !== id);
+  if(routingSettings.defaultModel === id) routingSettings.defaultModel = 'auto';
+
+  if(window.removeKeyBackend && window.triadReady){
+    window.removeKeyBackend(id).catch(() => {}); // best-effort cleanup, service is gone from UI regardless
+  }
+  renderServices();
+  renderGauges();
+  renderTools();
+  renderRoutingSettings();
+}
+
+// ---------- Add Service modal (replaces the old prompt()-chain) ----------
+function openAddServiceModal(){
+  document.getElementById('add-service-overlay').classList.add('open');
+  document.getElementById('as-name').value = '';
+  document.getElementById('as-capability').value = '';
+  document.getElementById('as-category').value = 'tool';
+  document.getElementById('as-baseurl').value = '';
+  document.getElementById('as-model').value = '';
+  document.getElementById('as-key').value = '';
+  toggleAddServiceFields();
+}
+function closeAddServiceModal(){
+  document.getElementById('add-service-overlay').classList.remove('open');
+}
+function toggleAddServiceFields(){
+  const isReasoning = document.getElementById('as-category').value === 'reasoning';
+  document.getElementById('as-endpoint-fields').style.display = isReasoning ? 'block' : 'none';
+}
+
+function submitAddService(){
+  const name = document.getElementById('as-name').value.trim();
+  const capability = document.getElementById('as-capability').value.trim() || 'General purpose';
+  const category = document.getElementById('as-category').value; // 'reasoning' | 'tool'
+  const baseUrl = document.getElementById('as-baseurl').value.trim();
+  const modelId = document.getElementById('as-model').value.trim();
+  const key = document.getElementById('as-key').value.trim();
+
+  if(!name) return;
+  if(category === 'reasoning' && !baseUrl){
+    alert('Reasoning models need an API endpoint (base URL) so TRIAD knows where to send requests.');
+    return;
+  }
+
+  const id = name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+  const palette = ['#a08a6f','#8a9c6f','#8a7ca0','#c9a469','#7a8fa6','#a67a8f'];
+  const entry = {
+    id, name, capability, builtin:false,
+    swatch: palette[registry().length % palette.length],
+    type: category === 'reasoning' ? 'core' : 'tool',
+    noHeaders: true, // custom services default to no live tracking until proven otherwise
+  };
+
+  if(category === 'reasoning'){
+    entry.baseUrl = baseUrl;
+    entry.modelId = modelId || null;
+    entry.used = 0; entry.limit = 100; entry.reset = 3600; entry.hasRealUsage = false;
+    models.push(entry);
+  } else {
+    entry.creditsUsed = 0; entry.creditsLimit = 100;
+    tools.push(entry);
+  }
+
+  closeAddServiceModal();
+  renderServices();
+
+  if(key){
+    // The real input for this service now exists in the DOM (renderServices
+    // just drew it, since it has no key yet) — fill it and save directly.
+    const realInput = document.getElementById(`key-input-${id}`);
+    if(realInput){
+      realInput.value = key;
+      saveKey(id);
+    }
+  }
+}
+
+renderGauges();
+renderTools();
+renderServices();
+renderRoutingSettings();
+renderLogs();
+renderRequests();
+renderTasks();
+</script>
+
+</body>
+</html>
