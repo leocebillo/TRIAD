@@ -145,7 +145,7 @@
     </svg>
     <div class="brand-name">TRIAD</div>
   </div>
-  <div class="status-pill"><span class="pulse-ring"></span>ALL SYSTEMS SYNCED</div>
+  <div class="status-pill" id="status-pill"><span class="pulse-ring" id="pulse-dot"></span>CHECKING…</div>
 </header>
 
 <main>
@@ -165,22 +165,67 @@
   </div>
 
   <h1>TRIAD</h1>
-  <div class="tagline">Multiple Models · One Console</div>
-  <p class="desc">One place to route work with AI models — live rate limits, task progress, and a running log of what each one's been doing, all in real time.</p>
+  <div class="tagline">Multiple AI & Services · One Console</div>
+  <p class="desc">One place to route work across AI models — live rate limits, task progress, and a running log of what each one's been doing, all in real time.</p>
 
   <div class="cta-row">
     <a href="triad-dashboard.html" class="btn btn-primary">Enter Dashboard →</a>
     <a href="docs.html" class="btn btn-ghost">Documentation</a>
   </div>
 
-  <div class="stat-row">
-    <div class="stat"><div class="stat-model">Claude</div><div class="stat-val">38%</div></div>
-    <div class="stat"><div class="stat-model">ChatGPT</div><div class="stat-val">62%</div></div>
-    <div class="stat"><div class="stat-model">Gemini</div><div class="stat-val">79%</div></div>
+  <div class="stat-row" id="stat-row">
+    <div class="stat"><div class="stat-model">Status</div><div class="stat-val" style="font-size:14px;color:var(--muted);">Checking connections…</div></div>
   </div>
 </main>
 
 <footer>TRIAD — BUILT BY LEO CEDILLO</footer>
+
+<script type="module">
+  // Pulls real connection status from the Worker — no fake numbers.
+  // Uses sessionStorage as a light cache so repeat visits in the same tab
+  // don't re-hit the Worker every single load.
+  const WORKER_URL = "https://triad-backend.leocedillo.workers.dev";
+  const DASHBOARD_TOKEN = "leo020808";
+
+  const NAMES = { claude:'Claude', chatgpt:'ChatGPT', gemini:'Gemini', groq:'Groq', mistral:'Mistral', 'workers-ai':'Workers AI' };
+
+  async function loadStatus(){
+    const row = document.getElementById('stat-row');
+    try{
+      const res = await fetch(WORKER_URL + "/key-status", { headers: { "x-triad-token": DASHBOARD_TOKEN } });
+      if(!res.ok) throw new Error(`status ${res.status}`);
+      const data = await res.json();
+      const connected = (data.services || []).filter(id => NAMES[id]);
+      const pill = document.getElementById('status-pill');
+      const dot = document.getElementById('pulse-dot');
+
+      if(connected.length === 0){
+        if(pill){ pill.lastChild.textContent = 'NOTHING CONNECTED'; }
+        if(dot){ dot.style.background = 'var(--muted-dim)'; dot.style.animation = 'none'; dot.style.boxShadow = 'none'; }
+        row.innerHTML = `<div class="stat"><div class="stat-model">Status</div><div class="stat-val" style="font-size:14px;color:var(--muted);">Nothing connected yet</div></div>`;
+        return;
+      }
+
+      if(pill){ pill.lastChild.textContent = `${connected.length} SERVICE${connected.length===1?'':'S'} CONNECTED`; }
+
+      row.innerHTML = connected.map(id => `
+        <div class="stat">
+          <div class="stat-model">${NAMES[id]}</div>
+          <div class="stat-val" style="font-size:14px;color:var(--good);">Connected</div>
+        </div>
+      `).join('');
+    } catch(err){
+      console.error("Couldn't load connection status:", err);
+      const pill = document.getElementById('status-pill');
+      const dot = document.getElementById('pulse-dot');
+      if(pill){ pill.lastChild.textContent = 'BACKEND UNREACHABLE'; }
+      if(dot){ dot.style.background = 'var(--crit, #b56a5a)'; dot.style.animation = 'none'; dot.style.boxShadow = 'none'; }
+      row.innerHTML = `<div class="stat"><div class="stat-model">Status</div><div class="stat-val" style="font-size:14px;color:var(--muted-dim);">Backend unreachable</div></div>`;
+    }
+  }
+
+  loadStatus();
+</script>
 
 </body>
 </html>
