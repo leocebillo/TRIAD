@@ -21,9 +21,8 @@
   ::selection{background:var(--brass-700);color:var(--ink-950);}
   a{color:var(--brass-400);}
 
-  /* ---------- Sidebar (matches dashboard) ---------- */
   .sidebar{
-    width:248px; flex-shrink:0; background:var(--ink-900); border-right:1px solid var(--line);
+    width:252px; flex-shrink:0; background:var(--ink-900); border-right:1px solid var(--line);
     display:flex; flex-direction:column; padding:28px 20px; position:sticky; top:0; height:100vh; overflow-y:auto;
   }
   .brand{ display:flex; align-items:center; gap:12px; margin-bottom:32px; padding-left:2px; cursor:pointer; }
@@ -38,37 +37,38 @@
 
   nav{display:flex;flex-direction:column;gap:1px;}
   nav a{
-    display:block; padding:8px 10px; border-radius:6px; color:var(--muted); text-decoration:none;
-    font-size:13px; letter-spacing:0.2px; transition:background .15s ease,color .15s ease;
+    display:block; padding:7px 10px; border-radius:6px; color:var(--muted); text-decoration:none;
+    font-size:12.5px; letter-spacing:0.2px; transition:background .15s ease,color .15s ease;
   }
   nav a:hover{color:var(--brass-400);background:var(--ink-800);}
   nav .section-label{
     font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:1.5px; color:var(--muted-dim);
-    text-transform:uppercase; margin:18px 0 6px 10px;
+    text-transform:uppercase; margin:16px 0 6px 10px;
   }
   nav .section-label:first-child{margin-top:0;}
 
-  /* ---------- Main content ---------- */
-  main{flex:1; max-width:900px; padding:56px 64px 120px; }
-  .doc-header{margin-bottom:48px;}
+  main{flex:1; max-width:920px; padding:56px 64px 140px; }
+  .doc-header{margin-bottom:52px;}
   .eyebrow{
     font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:3px; color:var(--muted-dim);
     text-transform:uppercase; margin-bottom:10px;
   }
-  h1{ font-family:'Fraunces',serif; font-weight:500; font-size:40px; color:var(--brass-300); letter-spacing:0.5px; }
-  .doc-header p{color:var(--muted); font-size:15px; margin-top:12px; max-width:560px; line-height:1.6;}
+  h1{ font-family:'Fraunces',serif; font-weight:500; font-size:42px; color:var(--brass-300); letter-spacing:0.5px; }
+  .doc-header p{color:var(--muted); font-size:15px; margin-top:14px; max-width:600px; line-height:1.7;}
 
-  section{margin-bottom:56px; scroll-margin-top:32px;}
+  section{margin-bottom:60px; scroll-margin-top:32px;}
   h2{
-    font-family:'Fraunces',serif; font-weight:500; font-size:24px; color:var(--brass-300);
-    margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--line);
+    font-family:'Fraunces',serif; font-weight:500; font-size:25px; color:var(--brass-300);
+    margin-bottom:18px; padding-bottom:12px; border-bottom:1px solid var(--line);
   }
-  h3{ font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:15px; color:var(--brass-400); margin:24px 0 10px; }
-  p{color:#c9bda0; font-size:14.5px; line-height:1.75; margin-bottom:14px;}
-  p.muted{color:var(--muted); font-size:13.5px;}
-  ul, ol{margin:0 0 16px 22px; color:#c9bda0; font-size:14.5px; line-height:1.8;}
-  li{margin-bottom:4px;}
+  h3{ font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:15.5px; color:var(--brass-400); margin:26px 0 10px; }
+  h4{ font-family:'JetBrains Mono',monospace; font-weight:500; font-size:12px; letter-spacing:0.5px; color:var(--brass-500); text-transform:uppercase; margin:18px 0 8px; }
+  p{color:#c9bda0; font-size:14.5px; line-height:1.8; margin-bottom:14px;}
+  p.muted{color:var(--muted); font-size:13px;}
+  ul, ol{margin:0 0 16px 22px; color:#c9bda0; font-size:14.5px; line-height:1.85;}
+  li{margin-bottom:5px;}
   strong{color:var(--brass-300); font-weight:600;}
+  em{color:var(--brass-400);font-style:normal;}
   code{
     font-family:'JetBrains Mono',monospace; font-size:12.5px; background:var(--ink-800);
     border:1px solid var(--line); border-radius:4px; padding:2px 6px; color:var(--brass-400);
@@ -81,18 +81,19 @@
 
   .callout{
     background:var(--ink-900); border:1px solid var(--line); border-left:3px solid var(--brass-700);
-    border-radius:0 8px 8px 0; padding:14px 18px; margin:16px 0; font-size:13.5px; color:var(--muted);
+    border-radius:0 8px 8px 0; padding:14px 18px; margin:18px 0; font-size:13.5px; color:var(--muted); line-height:1.7;
   }
   .callout b{color:var(--brass-400);}
   .callout.warn{border-left-color:var(--warn);}
   .callout.crit{border-left-color:var(--crit);}
+  .callout.good{border-left-color:var(--good);}
 
-  table{ width:100%; border-collapse:collapse; margin:16px 0 20px; font-size:13.5px; }
+  table{ width:100%; border-collapse:collapse; margin:16px 0 22px; font-size:13.5px; }
   th{
     text-align:left; font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:0.5px;
-    text-transform:uppercase; color:var(--muted-dim); padding:8px 12px; border-bottom:1px solid var(--line);
+    text-transform:uppercase; color:var(--muted-dim); padding:9px 12px; border-bottom:1px solid var(--line);
   }
-  td{padding:10px 12px; border-bottom:1px solid var(--ink-800); color:#c9bda0;}
+  td{padding:11px 12px; border-bottom:1px solid var(--ink-800); color:#c9bda0; vertical-align:top;}
   tr:last-child td{border-bottom:none;}
   .status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:7px;}
   .status-dot.good{background:var(--good);}
@@ -101,11 +102,24 @@
 
   .arch-diagram{
     background:var(--ink-900); border:1px solid var(--line); border-radius:10px;
-    padding:24px; margin:18px 0; font-family:'JetBrains Mono',monospace; font-size:12.5px;
-    color:var(--muted); line-height:2;
+    padding:24px 26px; margin:18px 0; font-family:'JetBrains Mono',monospace; font-size:12.5px;
+    color:var(--muted); line-height:2.1;
   }
   .arch-diagram .node{color:var(--brass-400);}
   .arch-diagram .arrow{color:var(--muted-dim);}
+  .arch-diagram .indent{padding-left:22px;}
+  .arch-diagram .indent2{padding-left:44px;}
+
+  .feature-card{
+    background:var(--ink-900); border:1px solid var(--line); border-radius:10px;
+    padding:18px 22px; margin-bottom:14px;
+  }
+  .feature-card h4{margin-top:0;}
+
+  .toc-pill{
+    display:inline-block; font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.5px;
+    color:var(--muted-dim); border:1px solid var(--line); border-radius:20px; padding:2px 10px; margin-left:8px;
+  }
 
   @media(max-width:900px){
     body{flex-direction:column;}
@@ -132,26 +146,42 @@
   <a class="back-link" href="triad-dashboard.html">← Back to Dashboard</a>
 
   <nav>
-    <div class="section-label">Overview</div>
+    <div class="section-label">Start Here</div>
     <a href="#what-is-triad">What TRIAD Is</a>
-    <a href="#architecture">Architecture</a>
-    <a href="#status">Live vs. Limited</a>
+    <a href="#architecture">How It's Built</a>
+    <a href="#data-flow">Where Data Lives</a>
+    <a href="#status">What's Live vs. Limited</a>
 
-    <div class="section-label">Using It</div>
-    <a href="#pages">The Five Pages</a>
-    <a href="#new-prompt">New Prompt & Routing</a>
-    <a href="#requests">Handling Requests</a>
-    <a href="#adding-services">Adding a Service</a>
+    <div class="section-label">Overview Page</div>
+    <a href="#overview-page">Rate Limit Gauges</a>
+    <a href="#tool-credits">Tool Credit Cards</a>
 
-    <div class="section-label">Setting It Up</div>
-    <a href="#firebase-setup">Firebase</a>
-    <a href="#worker-setup">Cloudflare Worker</a>
-    <a href="#github-pages">Deploying to GitHub Pages</a>
+    <div class="section-label">The Prompt Engine</div>
+    <a href="#new-prompt">New Prompt Flow</a>
+    <a href="#decompose">How Decomposition Works</a>
+    <a href="#routing">Routing & Fallback</a>
+    <a href="#execution">How a Task Actually Runs</a>
 
-    <div class="section-label">Reference</div>
+    <div class="section-label">The Clarification Loop</div>
+    <a href="#clarification">How a Model Asks for Help</a>
+    <a href="#requests-page">The Requests Page</a>
+    <a href="#resume">Resuming a Blocked Task</a>
+
+    <div class="section-label">Tasks & Output</div>
+    <a href="#tasks-page">Reading the Tasks Page</a>
+    <a href="#grouping">Plan Grouping & Combined View</a>
+    <a href="#code-extraction">Code Extraction & Downloads</a>
+
+    <div class="section-label">Everything Else</div>
+    <a href="#log-check">Log Check</a>
+    <a href="#settings-page">Settings, In Full</a>
+    <a href="#adding-services">Adding a Custom Service</a>
+
+    <div class="section-label">Under the Hood</div>
     <a href="#security">Security Model</a>
+    <a href="#firestore-schema">Firestore Schema</a>
     <a href="#limitations">Known Limitations</a>
-    <a href="#troubleshooting">Troubleshooting</a>
+    <a href="#run-your-own">Running Your Own Copy</a>
   </nav>
 </aside>
 
@@ -159,157 +189,222 @@
   <div class="doc-header">
     <div class="eyebrow">Documentation</div>
     <h1>How TRIAD Works</h1>
-    <p>One console for Claude, ChatGPT, Gemini, and anything else you connect — what's real, what's still a demo, and how to run your own copy.</p>
+    <p>TRIAD is a personal control room for AI — one dashboard that routes work across Claude, ChatGPT, Gemini, and anything else you plug into it, instead of juggling five browser tabs. This page walks through everything under the hood: how a prompt turns into a plan, how a plan turns into real running tasks, how a model asks you a question mid-task, and how the whole thing stays in sync in real time. Written the way we'd want it explained to us.</p>
   </div>
 
   <section id="what-is-triad">
     <h2>What TRIAD Is</h2>
-    <p>TRIAD is a personal dashboard for routing work across multiple AI services instead of juggling separate tabs. You type one request, it gets split into pieces matched to whichever connected service fits each piece best, and you watch real rate-limit usage, task progress, and a running log — all from one place.</p>
-    <p>It's built with no frameworks — plain HTML/CSS/JS on the frontend, matching the rest of this site's structure. There's no build step; the dashboard is a single file you can open directly or host anywhere that serves static files.</p>
+    <p>At its simplest, TRIAD does one thing: you describe what you need, and it figures out which connected AI service is best suited for each piece of that request, runs it for real, and shows you the result — live, without needing to refresh. No frameworks, no build step. It's plain HTML, CSS, and JavaScript, matching the rest of this site's approach: open the file, everything's right there to read.</p>
+    <p>The name comes from the original idea: three models working together instead of three separate conversations. It's grown since then — TRIAD now happily juggles more than three services, including free ones, paid ones, image/video/audio generators, and anything else with an API that speaks a compatible language. The name stuck because the idea didn't change, just the roster.</p>
   </section>
 
   <section id="architecture">
-    <h2>Architecture</h2>
-    <p>Three pieces, each doing one job:</p>
+    <h2>How It's Built</h2>
+    <p>TRIAD is three separate pieces that each do exactly one job, and nothing more:</p>
     <div class="arch-diagram">
-      <span class="node">Browser (triad-dashboard.html)</span><br>
-      &nbsp;&nbsp;<span class="arrow">├─</span> Firebase Auth <span class="arrow">→</span> anonymous sign-in, gives you a stable identity<br>
-      &nbsp;&nbsp;<span class="arrow">├─</span> Firestore <span class="arrow">→</span> tasks / logs / requests, synced in real time<br>
-      &nbsp;&nbsp;<span class="arrow">└─</span> Cloudflare Worker <span class="arrow">→</span> holds API keys, calls each provider<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="arrow">└─</span> Workers KV <span class="arrow">→</span> where keys actually live, never in the browser
+      <span class="node">Your browser</span> — the dashboard itself, a single HTML file<br>
+      <div class="indent"><span class="arrow">↕</span> Firebase Auth <span class="arrow">→</span> anonymous sign-in, just enough identity to scope your data</div>
+      <div class="indent"><span class="arrow">↕</span> Firestore <span class="arrow">→</span> tasks, logs, and requests — synced live via onSnapshot</div>
+      <div class="indent"><span class="arrow">↕</span> Cloudflare Worker <span class="arrow">→</span> the only thing that ever touches API keys or calls a model</div>
+      <div class="indent2"><span class="arrow">↕</span> Workers KV <span class="arrow">→</span> where keys actually live, server-side, never in the browser</div>
     </div>
-    <p>The split matters for one reason: <strong>your API keys never touch the browser after the moment you paste them</strong>. They go straight to the Worker, which stores them server-side in KV and is the only thing that ever makes the real calls to Claude/ChatGPT/Gemini/etc. The dashboard just asks the Worker to run something and gets a result back.</p>
-    <p>Firestore is separate from that — it's not for secrets, it's for everything the UI needs to sync live: task progress, the activity log, and requests. Firestore's security rules scope every document to your own signed-in <code>uid</code>, so even though the database is technically reachable from any browser, nothing readable belongs to anyone but you.</p>
+    <p>The reason it's split this way instead of one big app: <strong>a browser tab is not a safe place to keep an API key.</strong> Anyone with dev tools open can read anything sitting in frontend JavaScript. So the Worker exists as a wall — the dashboard tells it "run this prompt on Claude," the Worker looks up the actual key (which the browser has never seen and never will again after the moment it was typed in), makes the real call, and hands back a result. The key itself never crosses back over that wall.</p>
+    <p>Firestore is a separate concern entirely — it's not for secrets, it's for everything that needs to feel alive: task progress ticking up, a request appearing the moment a model asks for something, a log entry landing the second a task finishes. Firestore's security rules pin every document to the signed-in session that created it, so even though the database is technically reachable from any browser on the internet, nothing in it is readable by anyone but you.</p>
+    <h3>Why Cloudflare instead of Firebase Functions</h3>
+    <p>The obvious choice for "run backend code near Firebase" is Firebase Cloud Functions. We tried that first. It turns out Cloud Functions require Google's paid Blaze plan the moment you need to make an outbound network call — even a single request to Anthropic's API counts as "outbound," so the free Spark plan can't do it at all. Cloudflare Workers, on the other hand, offer a genuinely free tier (100,000 requests a day, no credit card) that has no such restriction. So Firestore and Auth stayed on Firebase, and the actual "talk to an API" logic moved to a Cloudflare Worker instead. Two providers, each doing what they're actually free at.</p>
   </section>
 
-  <section id="status">
-    <h2>Live vs. Limited</h2>
-    <p>Not everything shown in TRIAD is equally "real" — here's the honest breakdown so nothing surprises you once you're relying on it:</p>
+  <section id="data-flow">
+    <h2>Where Data Lives</h2>
+    <p>It's worth being precise about this, since "where does my data live" is usually the first real question worth asking about any tool like this:</p>
     <table>
-      <tr><th>Feature</th><th>Status</th><th>Notes</th></tr>
-      <tr><td>Tasks, logs, requests</td><td><span class="status-dot good"></span>Real-time</td><td>Stored in Firestore, synced via <code>onSnapshot</code> — survives refresh, updates live across tabs.</td></tr>
-      <tr><td>New Prompt execution</td><td><span class="status-dot good"></span>Real</td><td>Confirming a plan actually calls the Worker, which actually calls the model.</td></tr>
-      <tr><td>Claude / ChatGPT / Groq usage gauges</td><td><span class="status-dot good"></span>Real (on refresh)</td><td>Pulled from actual rate-limit response headers. Click "Refresh Usage" to update — it's a real API call, so it's manual, not polled.</td></tr>
-      <tr><td>Gemini / Mistral / Workers AI gauges</td><td><span class="status-dot warn"></span>Not trackable</td><td>These providers don't expose per-request rate-limit headers at all. Fully usable, just not measurable the same way.</td></tr>
-      <tr><td>Automatic model-initiated requests</td><td><span class="status-dot crit"></span>Not built yet</td><td>Nothing currently detects "this model needs clarification" and creates a Request automatically — that needs the model call to signal it explicitly, which isn't wired up.</td></tr>
-      <tr><td>Meshy / Suno calls</td><td><span class="status-dot warn"></span>Unverified</td><td>Written against each provider's typical REST shape but not confirmed against live docs — check before relying on it.</td></tr>
+      <tr><th>Data</th><th>Lives in</th><th>Who can read it</th></tr>
+      <tr><td>API keys (Claude, ChatGPT, etc.)</td><td>Cloudflare Workers KV</td><td>Only the Worker itself, server-side. Never returned to the browser after saving.</td></tr>
+      <tr><td>Tasks, logs, requests</td><td>Firestore</td><td>Only your signed-in session — every document is scoped to a <code>uid</code> via security rules.</td></tr>
+      <tr><td>Routing settings, hidden services</td><td>Browser memory (currently)</td><td>Nobody but you, but it doesn't survive a refresh yet — see the limitations section.</td></tr>
+      <tr><td>The prompts you type and the outputs you get back</td><td>Firestore (as part of each task doc) and, briefly, the model provider's own servers while generating a response</td><td>You, plus whatever the model provider's own data policy says about API traffic (varies by provider — worth checking each one's terms if that matters to you).</td></tr>
     </table>
   </section>
 
-  <section id="pages">
-    <h2>The Five Pages</h2>
-    <h3>Overview</h3>
-    <p>Rate-limit gauges for whatever's connected and capable of showing real usage, plus a recent-activity feed. Nothing shows here until you've connected at least one service with header-based tracking (Claude, ChatGPT, or Groq).</p>
-    <h3>Log Check</h3>
-    <p>Every completed (or failed) task, with date, time, and which service handled it. This is the running record — mostly useful for looking back at what actually happened across a session.</p>
-    <h3>Requests</h3>
-    <p>Where you'd respond to something a model flagged mid-task — approve a decision, hand over account details, whatever it needs. Right now these are only created by you or seeded as demo data, since automatic model-initiated requests aren't built (see <a href="#status">Live vs. Limited</a>).</p>
-    <h3>Tasks</h3>
-    <p>Live status for anything running or finished — queued, running, complete, or failed, with the actual error message shown if something broke.</p>
-    <h3>Settings</h3>
-    <p>Connect or remove services, set routing preferences, and manage what's visible. Covered in detail below.</p>
+  <section id="status">
+    <h2>What's Live vs. Limited</h2>
+    <p>Not everything in TRIAD works the same way under the hood, and being upfront about that matters more than pretending everything's uniformly "real":</p>
+    <table>
+      <tr><th>Feature</th><th>Status</th><th>Notes</th></tr>
+      <tr><td>Tasks, logs, requests</td><td><span class="status-dot good"></span>Real-time</td><td>Firestore + <code>onSnapshot</code> — survives a refresh, updates live across open tabs.</td></tr>
+      <tr><td>New Prompt execution</td><td><span class="status-dot good"></span>Real</td><td>Confirming a plan genuinely calls the Worker, which genuinely calls the model. Nothing here is simulated.</td></tr>
+      <tr><td>Claude / ChatGPT / Groq usage gauges</td><td><span class="status-dot good"></span>Real, on demand</td><td>Pulled straight from real rate-limit response headers. "Refresh Usage" makes an actual tiny API call, so it's a button, not a poller.</td></tr>
+      <tr><td>Gemini / Mistral / Workers AI gauges</td><td><span class="status-dot warn"></span>Not trackable</td><td>These providers simply don't expose per-request rate-limit headers. Fully usable — just not measurable the same way, and TRIAD says so rather than faking a number.</td></tr>
+      <tr><td>Clarification loop (model asks a question)</td><td><span class="status-dot good"></span>Real, but probabilistic</td><td>The model is instructed to signal when it needs input, in a strict JSON format. Strong models follow this reliably; smaller/free models less so. See the dedicated section below.</td></tr>
+      <tr><td>Code file extraction</td><td><span class="status-dot good"></span>Real</td><td>Parses fenced code blocks out of raw model text and offers them as real downloadable files.</td></tr>
+      <tr><td>Meshy / Suno integration</td><td><span class="status-dot warn"></span>Unverified</td><td>Written against each provider's typical REST shape, not confirmed against live traffic. Worth a sanity check against current docs before leaning on it.</td></tr>
+    </table>
+  </section>
+
+  <section id="overview-page">
+    <h2>Overview Page: Rate Limit Gauges</h2>
+    <p>This is the landing page once you're inside the dashboard. Each gauge shows a connected model's remaining rate-limit headroom as a percentage, pulled from the actual response headers a provider sends back with every API call. Anthropic and OpenAI both return <code>ratelimit-remaining</code>-style headers on every single response; Groq, since its API mirrors OpenAI's shape, does too.</p>
+    <p>A gauge only appears once two things are true: the service has a saved key, <em>and</em> it's actually capable of reporting usage. Gemini, Mistral, and Workers AI are usable everywhere else in the app but never show a gauge here, because there's genuinely nothing to show — those providers don't send the headers this feature depends on. Rather than fake a number, TRIAD just doesn't draw the gauge.</p>
+    <p>Each gauge carries a small badge — <strong>LIVE</strong> once real numbers have been pulled at least once, <strong>MOCK</strong> before that's happened. Hitting <strong>Refresh Usage</strong> in the top-right makes one genuine, tiny API call to each trackable service purely to read its headers, then stores the result so it survives a refresh. It's a button and not an automatic poller on purpose — every refresh is a real request against your actual quota, however small.</p>
+  </section>
+
+  <section id="tool-credits">
+    <h2>Tool Credit Cards</h2>
+    <p>Below the reasoning-model gauges sits a second row for capability-specific tools — currently Meshy (3D generation) and Suno (music generation). These work on a credit system rather than a rolling rate-limit window, so they get their own compact card showing credits used against the total, once connected.</p>
   </section>
 
   <section id="new-prompt">
-    <h2>New Prompt & Routing</h2>
-    <p>Click <strong>+ New Prompt</strong> on Overview, describe what you need in plain language, and hit <strong>Break It Down</strong>. TRIAD splits it into steps and proposes a service for each one, with a short reason why — you can override any assignment before confirming.</p>
-    <p>Routing works two ways, set in <strong>Settings → Routing</strong>:</p>
-    <ul>
-      <li><strong>Auto (best fit)</strong> — the default. Capability keywords (3D, music, etc.) route to Meshy/Suno; everything else splits across a scope → build → review pattern.</li>
-      <li><strong>A specific default model</strong> — overrides the split entirely and sends reasoning steps to whichever model you've picked, falling back through your configured <strong>Fallback order</strong> if that model isn't actually connected.</li>
-    </ul>
-    <p class="muted">Capability-specific tools (Meshy, Suno) never silently fall back to a text model — there's no reasonable substitute for "generate a 3D asset" among reasoning models, so a disconnected tool just gets flagged instead of misrouted.</p>
+    <h2>The New Prompt Flow</h2>
+    <p>Click <strong>+ New Prompt</strong> from Overview and a plain textarea appears — describe what you need in ordinary language, no special syntax, no need to say which model should do what. Hit <strong>Break It Down</strong> and TRIAD reads the request and proposes a plan: a short list of steps, each one assigned to whichever connected service fits, with a one-line reason why.</p>
+    <p>That plan is a proposal, not a commitment. Every step has a dropdown — override any assignment before anything runs. Once it looks right, <strong>Confirm & Start</strong> is what actually kicks things off: real tasks get created, and the app jumps you straight to the Tasks page to watch them go.</p>
   </section>
 
-  <section id="requests">
-    <h2>Handling Requests</h2>
-    <p>Click a request card to expand it. If it's <strong>Open</strong>, type your response and hit <strong>Send Response</strong> — that moves it to <strong>Responded</strong>. From there, <strong>Mark Complete &amp; Notify</strong> closes the loop. Every state change writes straight to Firestore, so it's reflected instantly if you have the dashboard open in another tab.</p>
+  <section id="decompose">
+    <h2>How Decomposition Works</h2>
+    <p>The splitting logic looks for two kinds of signal in what you typed. First, capability keywords — words like "3D," "mesh," "model" (in the sculpting sense), or "song," "music," "soundtrack" — route straight to whichever connected tool specializes in that (Meshy or Suno). A reasoning model, however capable, genuinely can't output a 3D mesh or an audio file, so this routing never falls back to one; if the right tool isn't connected, the plan says so plainly instead of quietly assigning something that can't actually do the job.</p>
+    <p>Everything else — the bulk of most requests — splits across a default three-stage pattern: <strong>scope &amp; structure</strong> first (turning a loose idea into something concrete), <strong>core build</strong> second (the actual implementation), <strong>review &amp; catch edge cases</strong> third (a second model taking a fresh pass over what the first one built). Three different services touch the request by default, each doing the part it's naturally suited for.</p>
+    <div class="callout">
+      <b>On the word "decompose":</b> right now this splitting logic is deterministic pattern-matching, not a model call in itself — fast, free, and predictable, but it doesn't understand your request the way a model would. A more capable version would send the raw prompt to a model and ask it to propose the plan directly; the plan format is already shaped to support that swap without touching anything downstream.
+    </div>
+  </section>
+
+  <section id="routing">
+    <h2>Routing &amp; Fallback</h2>
+    <p>Settings → Routing controls two things. <strong>Default model</strong> lets you skip the three-stage split entirely and force every reasoning step in every plan onto one service — useful if you've decided, say, Groq is your daily driver and you don't need three different opinions on every request. <strong>Fallback order</strong> is a reorderable priority list: if a plan step lands on a model that isn't actually connected, TRIAD walks down that list and reassigns to the first one that is, rather than proposing a dead end.</p>
+    <p>Capability-locked tools sit outside this system on purpose — Meshy stays Meshy, Suno stays Suno, regardless of default model or fallback order, since nothing else can substitute for what they do.</p>
+  </section>
+
+  <section id="execution">
+    <h2>How a Task Actually Runs</h2>
+    <p>Confirming a plan doesn't run everything at once. Steps execute one at a time, in the order shown in the plan review — deliberately simple, since it matches the "runs after step N" dependency labels already shown before you confirm, and avoids the complexity of figuring out which steps could safely run in parallel. Each step's flow looks like this:</p>
+    <ol>
+      <li>A task document is created in Firestore with status <code>queued</code> — the real-time listener picks it up and a card appears on the Tasks page immediately.</li>
+      <li>Status flips to <code>running</code>, and the actual prompt gets sent to the Worker, which sends it to the real provider.</li>
+      <li>One of three things happens: the model finishes normally (status becomes <code>complete</code>, full output saved to the task), it fails for a real reason like a bad key or a rate limit (status becomes <code>error</code>, the actual error message saved), or it signals it needs your input before it can continue (status becomes <code>blocked</code> — see the clarification section next).</li>
+      <li>A log entry gets written either way, with a short preview of what happened.</li>
+    </ol>
+  </section>
+
+  <section id="clarification">
+    <h2>How a Model Asks for Help</h2>
+    <p>This is the piece that makes TRIAD feel less like a fire-and-forget tool and more like something you're actually working alongside. There's no API-level signal any provider sends for "I need clarification" — that had to be built as a convention. Every reasoning-model prompt gets wrapped, behind the scenes, with an instruction: if the task can't be completed without something only you can provide — a decision, account access, a missing piece of context — respond with a specific structured marker instead of guessing.</p>
+    <p>The Worker checks every response for an exact <code>{"needs_input": true, "question": "..."}</code> payload. That check is deliberately narrow — it only fires on that precise shape, so a task that legitimately asks for JSON as its actual deliverable doesn't get misread as a request for help.</p>
+    <div class="callout warn">
+      <b>Worth knowing:</b> this is a convention the model is asked to follow, not something enforced by the API itself. Strong models tend to follow it reliably. Smaller or free models sometimes don't — they might guess instead of asking, or ask in the wrong format and have it go unnoticed. That's a real, structural limitation of doing this without native provider support, not a bug to be patched away.
+    </div>
+  </section>
+
+  <section id="requests-page">
+    <h2>The Requests Page</h2>
+    <p>When a task gets blocked this way, a new document lands in the <code>requests</code> collection — tagged with which model asked, the exact question, and the task it's tied to. It shows up on the Requests page immediately, in real time, no refresh needed.</p>
+    <p>Click a card to expand it. If it's still <strong>Open</strong>, there's a text box to type your answer — account details, a decision, whatever it needs — and a <strong>Send Response</strong> button. That moves it to <strong>Responded</strong>, and a second button appears: <strong>Mark Complete &amp; Notify</strong>.</p>
+  </section>
+
+  <section id="resume">
+    <h2>Resuming a Blocked Task</h2>
+    <p>This is the step that closes the loop rather than leaving it half-finished. Clicking <strong>Mark Complete &amp; Notify</strong> doesn't just file the request away — if it's tied to a task, that task actually resumes. The model gets called again, fed back its own original question plus your answer, with instructions to continue and finish the original task using that new information. The task's status moves from <code>blocked</code> back through <code>running</code> to (hopefully) <code>complete</code>, same as any other task.</p>
+    <p>If the model needs a second round of clarification after that, the same mechanism creates another linked request rather than looping silently — you'll always see exactly what's being asked and when.</p>
+  </section>
+
+  <section id="tasks-page">
+    <h2>Reading the Tasks Page</h2>
+    <p>Every task shows its title, assigned model, a progress bar, and a status badge — <strong>Queued</strong>, <strong>Running…</strong>, <strong>Complete</strong>, <strong>Failed</strong>, or <strong>Awaiting your input</strong>. Failed tasks show the real error message underneath, not a generic "something went wrong" — if a key's missing, it says so; if a provider returned a specific error, that's what you see.</p>
+    <p>Completed tasks with real output get a <strong>View output</strong> link — expands to the full response in a scrollable panel, with a one-click <strong>Copy</strong> button.</p>
+  </section>
+
+  <section id="grouping">
+    <h2>Plan Grouping &amp; Combined View</h2>
+    <p>Every step generated from a single New Prompt run shares a <code>planId</code>, so instead of scattering three or four related steps as separate, disconnected cards, they group under one header showing your original request and a live "N/M steps complete" counter. Expand the group to see each individual step, or hit <strong>View combined output</strong> to see every step's response stacked together with clear labels — the scope step, the build step, and the review step, all in one scroll, which is exactly what you want when the pieces genuinely belong together (like a homepage build where the "review" step is meant to be read alongside the "build" step it's reviewing).</p>
+    <p>Single-step tasks, and anything from before this feature existed, render exactly as a plain card with no group wrapper — there's nothing to combine, so nothing pretends there is.</p>
+  </section>
+
+  <section id="code-extraction">
+    <h2>Code Extraction &amp; Downloads</h2>
+    <p>Any time a task's output contains fenced code blocks — the standard <code>&#96;&#96;&#96;language ... &#96;&#96;&#96;</code> markdown convention every model already uses when writing code — TRIAD pulls them out automatically. Each block gets a guessed filename based on its declared language (a <code>```python</code> block becomes <code>file-1.py</code>, <code>```html</code> becomes <code>file-1.html</code>, and so on) and a real <strong>Download</strong> button that saves it as an actual file through the browser, no copy-paste required.</p>
+    <p>For a grouped multi-step plan, there's also a <strong>Download all code</strong> button that gathers every code block across every step of that plan and downloads them all in sequence — useful when, say, the build step wrote the HTML and the review step suggested a separate CSS fix, and you want both files at once.</p>
+  </section>
+
+  <section id="log-check">
+    <h2>Log Check</h2>
+    <p>A running, chronological record of everything that's happened — every completed task, every failure, every time a model asked for clarification — with date, time, and which service was involved. It's the page to check when you want to know what actually took place across a session without digging through individual task cards.</p>
+  </section>
+
+  <section id="settings-page">
+    <h2>Settings, In Full</h2>
+    <h3>Connected Services</h3>
+    <p>Every service TRIAD knows about lives here — built-ins (Claude, ChatGPT, Gemini, Groq, Mistral, Workers AI, Meshy, Suno) plus anything added manually. Each row shows its capability, a masked key field once connected, and the actual controls:</p>
+    <ul>
+      <li><strong>Save &amp; Connect</strong> — sends a pasted key straight to the Worker, which stores it in KV. The browser never holds onto the real value after this point; the field shows a masked placeholder from then on.</li>
+      <li><strong>Change</strong> — clears the field for re-entry. The old key stays valid server-side until a new one is actually saved over it.</li>
+      <li><strong>Remove</strong> — genuinely deletes the key from the backend, not just a local UI reset. Confirms first, since it means re-pasting the key to reconnect later.</li>
+      <li><strong>Hide</strong> (built-ins only) — tucks a service out of the main list without touching its connection state at all. It's still fully usable everywhere else in the app; it just stops cluttering Settings if you don't use it. A small "N hidden services" toggle at the bottom brings any of them back into view.</li>
+      <li><strong>Delete</strong> (custom services only) — fully removes it from TRIAD's registry, not just a disconnect. Built-ins can't be deleted this way since the Worker has specific code written for each of them; anything you add yourself can be.</li>
+    </ul>
+    <h3>Routing</h3>
+    <p>Covered above in detail — default model and fallback order, both of which feed directly into how <code>decompose()</code> assigns steps.</p>
   </section>
 
   <section id="adding-services">
-    <h2>Adding a Service</h2>
-    <p>Settings → Connected Services → <strong>+ Add Another Service</strong>. Two categories:</p>
-    <ul>
-      <li><strong>Tool</strong> — image/video/audio generation, anything task-specific. No endpoint required at creation.</li>
-      <li><strong>Reasoning model</strong> — needs an API endpoint (base URL). Must accept the same request shape as OpenAI's <code>/chat/completions</code> — true for most providers today (OpenRouter, Together, Fireworks, DeepSeek, and others).</li>
-    </ul>
-    <p>Built-in services (Claude, ChatGPT, Gemini, Groq, Mistral, Workers AI, Meshy, Suno) can be <strong>Hidden</strong> from view if you don't use them, but not deleted — the Worker has specific code for each. Anything you add yourself can be fully <strong>Deleted</strong>.</p>
-  </section>
-
-  <section id="firebase-setup">
-    <h2>Firebase Setup</h2>
-    <p>Firestore and Auth run on Firebase's free Spark plan — no billing required for this part.</p>
-    <ol>
-      <li>Create a project at <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a></li>
-      <li><strong>Build → Firestore Database → Create database</strong> (production mode)</li>
-      <li><strong>Build → Authentication → Sign-in method → Anonymous → Enable</strong></li>
-      <li><strong>Project settings → General → Your apps → Web (&lt;/&gt;)</strong> — register an app, copy the config object</li>
-      <li>Paste that config into <code>triad-dashboard.html</code>, where it says <code>firebaseConfig</code></li>
-    </ol>
-    <div class="callout">
-      <b>Deploy the security rules too.</b> <code>firestore.rules</code> is what actually enforces that your data stays yours — deploy it with <code>firebase deploy --only firestore:rules</code>, or nothing will be readable/writable at all.
+    <h2>Adding a Custom Service</h2>
+    <p>Settings → Connected Services → <strong>+ Add Another Service</strong> opens a small form instead of a string of pop-ups. Two categories:</p>
+    <div class="feature-card">
+      <h4>Tool</h4>
+      <p style="margin-bottom:0;">Task-specific generators — image, video, voice, anything outside general reasoning. No API endpoint required at creation; TRIAD just tracks that it exists and lets you route to it manually.</p>
     </div>
-  </section>
-
-  <section id="worker-setup">
-    <h2>Cloudflare Worker Setup</h2>
-    <p>The Worker is what holds your API keys and makes real calls to each provider — it deliberately replaces Firebase Cloud Functions, since those require the paid Blaze plan just to make outbound requests. Cloudflare's free tier (100,000 requests/day) needs no card at all.</p>
-    <pre><code>npm install -g wrangler
-wrangler login          # or use an API token if OAuth can't reach your browser
-wrangler kv namespace create TRIAD_KEYS
-# paste the id it prints into wrangler.toml
-wrangler secret put DASHBOARD_TOKEN
-wrangler deploy</code></pre>
-    <p>Copy the resulting <code>*.workers.dev</code> URL and your <code>DASHBOARD_TOKEN</code> into <code>triad-dashboard.html</code> where it says <code>WORKER_URL</code> and <code>DASHBOARD_TOKEN</code>.</p>
-    <div class="callout warn">
-      <b>Cloud Shell / headless environments:</b> <code>wrangler login</code> tries to open a browser callback that often can't be reached from a cloud terminal. Use an API token instead: create one at <a href="https://dash.cloudflare.com/profile/api-tokens" target="_blank">dash.cloudflare.com/profile/api-tokens</a> with Workers Scripts + Workers KV Storage edit permissions, then <code>export CLOUDFLARE_API_TOKEN=your_token</code> before running any <code>wrangler</code> command.
+    <div class="feature-card">
+      <h4>Reasoning model</h4>
+      <p style="margin-bottom:0;">A general-purpose model that can take part in the normal scope/build/review split. Requires an API endpoint (base URL) — must accept the same request shape as OpenAI's <code>/chat/completions</code> endpoint, which is true of most providers today (OpenRouter, Together, Fireworks, DeepSeek, and plenty of others). Once added, it shows up in every model dropdown throughout the app exactly like a built-in.</p>
     </div>
-  </section>
-
-  <section id="github-pages">
-    <h2>Deploying to GitHub Pages</h2>
-    <p>The dashboard is static — no build step, no server needed for the frontend itself. GitHub Pages serves it as-is.</p>
-    <ol>
-      <li>Push <code>index.html</code>, <code>triad-dashboard.html</code>, and this <code>docs.html</code> to a GitHub repo</li>
-      <li>Repo <strong>Settings → Pages → Source</strong> → deploy from your main branch</li>
-      <li>Once live, your dashboard URL becomes the one place you actually use — the Firebase config and Worker URL are already baked into the file, nothing else to configure</li>
-    </ol>
-    <div class="callout crit">
-      <b>Before pushing:</b> double-check <code>triad-dashboard.html</code> doesn't contain a real, currently-valid API key pasted directly into the file anywhere. Keys belong in Settings (which sends them to the Worker/KV), never hardcoded into the HTML itself — GitHub Pages repos are public unless you're on a paid plan with private Pages.
-    </div>
+    <p>A key can be added at creation time or skipped and added later from the same Settings row as everything else.</p>
   </section>
 
   <section id="security">
     <h2>Security Model</h2>
     <ul>
-      <li><strong>API keys</strong> live only in Cloudflare Workers KV. The browser sends a key once, on save, and never sees it again — <code>renderServices()</code> shows a masked placeholder, not the real value.</li>
-      <li><strong>The Worker</strong> is gated by a single shared passphrase (<code>DASHBOARD_TOKEN</code>) sent as a header on every request. This is a single-user tool, so that's sufficient — it's not meant to support multiple separate accounts.</li>
-      <li><strong>Firestore</strong> data (tasks/logs/requests) is scoped per-<code>uid</code> via security rules — readable and writable only by the session that created it.</li>
-      <li><strong>The <code>secrets</code> collection</strong> in Firestore is fully locked (<code>allow read, write: if false</code>) — vestigial from an earlier architecture, kept locked down since nothing should ever write there.</li>
+      <li><strong>API keys</strong> live only in Cloudflare Workers KV. The browser sends a key exactly once, at save time, and can never read it back — the UI shows a masked placeholder, not the real value, from that point on.</li>
+      <li><strong>The Worker</strong> is gated by a single shared passphrase sent as a header on every request. That's intentionally simple — TRIAD is a single-user tool, not a multi-tenant service, so there's no need for individual accounts on the Worker side.</li>
+      <li><strong>Firestore</strong> data — tasks, logs, requests — is scoped per-<code>uid</code> through security rules. Readable and writable only by the session that created it, enforced server-side, not just hidden in the UI.</li>
+      <li>Firebase's client-side <code>apiKey</code>, visible in the page source, is <em>not</em> a secret in the way it sounds — Google's own documentation confirms this value is meant to be public; it identifies the project, it doesn't grant access on its own. The real access boundary is the security rules and Auth, not this string.</li>
     </ul>
+  </section>
+
+  <section id="firestore-schema">
+    <h2>Firestore Schema</h2>
+    <p>Four collections, each scoped to <code>uid</code>:</p>
+    <pre><code>tasks/{taskId}
+  title, model, pct, status, output, error,
+  planId, planSummary, planSteps, stepIndex,
+  uid, createdAt
+
+logs/{logId}
+  model, text, uid, timestamp
+
+requests/{requestId}
+  model, text, status, response, respondedAt,
+  askedAt, taskId, originalPrompt, uid, createdAt
+
+settings/{uid}
+  (routing preferences — not yet persisted here, see Known Limitations)</code></pre>
   </section>
 
   <section id="limitations">
     <h2>Known Limitations</h2>
+    <p>Nothing below is hidden or papered over — this is the honest list of what doesn't fully work yet:</p>
     <ul>
-      <li>No automatic detection of "this model needs your input" — Requests are manually created or seeded, not generated by an actual model signal.</li>
-      <li>Gemini, Mistral, and Workers AI can't show live rate-limit gauges — those providers don't expose the headers needed, full stop, not a bug to fix.</li>
-      <li>Meshy and Suno integration code is written but not verified against live traffic — their exact request/response shape should be double-checked against current docs before depending on it.</li>
-      <li>Tasks run sequentially, one at a time, even when steps don't strictly depend on each other — simple and predictable, but not the fastest possible execution.</li>
-      <li>"Refresh Usage" makes a real, tiny API call each time you click it — cheap, but not literally free, and not something to auto-poll.</li>
+      <li><strong>Routing settings and hidden services don't persist.</strong> Default model, fallback order, and which built-ins are hidden all live in browser memory only right now — they reset on every refresh. A <code>settings/{uid}</code> Firestore document exists in the rules but isn't being written to yet.</li>
+      <li><strong>Gemini, Mistral, and Workers AI can't show live rate-limit gauges</strong> — a real limitation of those providers, not something fixable in TRIAD's code.</li>
+      <li><strong>Meshy and Suno integration is unverified</strong> against current live traffic — written against typical REST conventions, worth double-checking against current docs before depending on it.</li>
+      <li><strong>Tasks run sequentially</strong>, even when steps don't strictly depend on each other. Simple and predictable, but not the fastest possible execution for plans with independent steps.</li>
+      <li><strong>Model provider strings drift.</strong> Providers deprecate specific model IDs on their own schedule (this has already happened twice during development — once with Cloudflare's Workers AI catalog, once with Gemini's 2.0 series). If a service suddenly starts failing with a "deprecated" or unexpected 429/404 error despite a valid key, the model string in the Worker is the first thing worth checking against that provider's current docs.</li>
+      <li><strong>The clarification loop is a convention, not a guarantee</strong> — covered in detail above, worth repeating here since it's the single biggest source of "why didn't this create a Request" confusion.</li>
     </ul>
   </section>
 
-  <section id="troubleshooting">
-    <h2>Troubleshooting</h2>
-    <h3>Backend shows OFFLINE</h3>
-    <p>Check both halves independently: Firebase config filled in correctly (not still the <code>PASTE_YOUR_...</code> placeholders), and <code>WORKER_URL</code>/<code>DASHBOARD_TOKEN</code> matching exactly what you deployed. A hard refresh (Ctrl/Cmd+Shift+R) rules out a stale cached copy.</p>
-    <h3>"Unauthorized" when saving a key</h3>
-    <p>The token in the dashboard doesn't match what's set on the Worker. Test directly against the Worker with <code>curl</code> to isolate which side is wrong before changing anything.</p>
-    <h3>A model call fails immediately</h3>
-    <p>Almost always account-side, not code-side — check the provider's billing/credits page. A 400 usually means a bad request (wrong model name); a 429 usually means quota or billing, not "too many requests" in the literal sense.</p>
-    <h3>Firestore permission-denied</h3>
-    <p>Confirm <code>firestore.rules</code> is actually deployed (<code>firebase deploy --only firestore:rules</code>) and that you're signed in (check <code>console.log</code> for "Signed in: ..." — anonymous auth needs to succeed before any read/write will pass the rules.)</p>
+  <section id="run-your-own">
+    <h2>Running Your Own Copy</h2>
+    <p>TRIAD is static — no build step, no server required for the frontend itself. It's three HTML files (the landing page, the dashboard, this documentation) that can be opened directly or served from anywhere that hosts static files, GitHub Pages included.</p>
+    <p>Standing up a working copy means three things existing at once: a Firebase project with Firestore and Anonymous Auth enabled (free, no billing needed), a deployed Cloudflare Worker holding the API keys and doing the actual provider calls (also free, no card needed), and the dashboard's own config pointing at both. The Worker replaces what would otherwise need to be a paid Cloud Functions setup — see the architecture section above for why that split exists.</p>
+    <p>Once both pieces are live and their connection details are in place, everything else — routing, adding services, running prompts — works entirely inside the dashboard itself. No further backend changes needed for day-to-day use.</p>
   </section>
 
 </main>
