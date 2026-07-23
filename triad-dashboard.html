@@ -316,6 +316,58 @@
   }
   .task-copy-btn:hover{color:var(--brass-400);border-color:var(--brass-700);}
 
+  .code-files{margin-top:12px;display:flex;flex-direction:column;gap:8px;}
+  .code-file{
+    display:flex;align-items:center;justify-content:space-between;
+    background:var(--ink-950);border:1px solid var(--line);border-radius:6px;
+    padding:8px 12px;font-family:'JetBrains Mono',monospace;font-size:11.5px;
+  }
+  .code-file-name{color:var(--brass-400);}
+  .code-file-lang{color:var(--muted-dim);margin-left:8px;}
+  .code-file-dl{
+    font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.5px;
+    padding:4px 11px;border-radius:20px;border:1px solid var(--brass-700);color:var(--brass-400);
+    cursor:pointer;background:transparent;
+  }
+  .code-file-dl:hover{background:rgba(227,195,131,0.1);}
+  .download-all-btn{
+    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.5px;
+    padding:7px 14px;border-radius:6px;cursor:pointer;border:none;margin-top:10px;
+    background:linear-gradient(135deg,var(--brass-400),var(--brass-700));color:var(--ink-950);font-weight:500;
+  }
+  .download-all-btn:hover{filter:brightness(1.1);}
+
+  .plan-group{border-bottom:1px solid var(--line);}
+  .plan-group:last-child{border-bottom:none;}
+  .plan-group-head{
+    padding:14px 20px;background:var(--ink-800);
+    display:flex;justify-content:space-between;align-items:center;cursor:pointer;
+  }
+  .plan-group-title{font-size:13px;color:var(--brass-400);font-family:'JetBrains Mono',monospace;}
+  .plan-group-count{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+  .plan-group-combined-btn{
+    font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.5px;
+    padding:5px 12px;border-radius:20px;border:1px solid var(--brass-700);color:var(--brass-400);
+    cursor:pointer;background:transparent;margin-top:8px;
+  }
+  .plan-group-combined-btn:hover{background:rgba(227,195,131,0.1);}
+  .combined-view{
+    max-height:0;overflow:hidden;transition:max-height .3s ease;
+  }
+  .combined-view.expanded{max-height:2000px;overflow-y:auto;}
+  .combined-view-inner{padding:16px 20px;background:var(--ink-950);}
+  .combined-step{margin-bottom:20px;}
+  .combined-step:last-child{margin-bottom:0;}
+  .combined-step-title{
+    font-size:12px;color:var(--brass-500);font-family:'JetBrains Mono',monospace;
+    margin-bottom:6px;letter-spacing:0.3px;
+  }
+  .combined-step-body{
+    font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.6;color:#c9bda0;
+    white-space:pre-wrap;word-break:break-word;background:var(--ink-900);border:1px solid var(--line);
+    border-radius:6px;padding:12px 14px;
+  }
+
   .btn-small{
     font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.5px;
     padding:8px 15px;border-radius:6px;cursor:pointer;border:none;
@@ -1272,6 +1324,48 @@ function reqCardHTML(r){
 }
 
 // ---------- Tasks ----------
+// ---------- Code extraction & file download ----------
+// Pulls fenced ```lang\n...\n``` blocks out of a model's raw text response,
+// so a coding task's output can offer real downloadable files instead of
+// just a wall of text you'd have to hand-copy out yourself.
+const EXT_BY_LANG = {
+  javascript:'js', js:'js', typescript:'ts', ts:'ts', jsx:'jsx', tsx:'tsx',
+  python:'py', py:'py', html:'html', css:'css', json:'json', java:'java',
+  c:'c', cpp:'cpp', 'c++':'cpp', csharp:'cs', 'c#':'cs', go:'go', rust:'rs',
+  ruby:'rb', php:'php', sql:'sql', bash:'sh', sh:'sh', shell:'sh',
+  yaml:'yml', yml:'yml', markdown:'md', md:'md', lua:'lua', swift:'swift',
+  kotlin:'kt', xml:'xml', dockerfile:'Dockerfile',
+};
+
+function extractCodeBlocks(text){
+  if(!text) return [];
+  const blocks = [];
+  const regex = /```(\w+)?\n([\s\S]*?)```/g;
+  let match, i = 0;
+  while((match = regex.exec(text)) !== null){
+    i++;
+    const lang = (match[1] || '').toLowerCase().trim();
+    const code = match[2].replace(/\n+$/,'');
+    if(!code.trim()) continue;
+    const ext = EXT_BY_LANG[lang] || 'txt';
+    blocks.push({
+      lang: lang || 'text',
+      code,
+      filename: ext === 'Dockerfile' ? 'Dockerfile' : `file-${i}.${ext}`,
+    });
+  }
+  return blocks;
+}
+
+function downloadTextFile(filename, content){
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+
 function escapeHtml(str){
   const div = document.createElement('div');
   div.textContent = str == null ? '' : String(str);
@@ -1279,41 +1373,143 @@ function escapeHtml(str){
 }
 
 let expandedTaskIds = new Set();
+let expandedGroupIds = new Set();
+let expandedCombinedIds = new Set();
+
+function taskCardHTML(t, statusColor, statusLabel){
+  const status = t.status || 'complete';
+  const hasOutput = !!(t.output && t.output.trim());
+  const isExpanded = expandedTaskIds.has(t.id);
+  const codeBlocks = hasOutput ? extractCodeBlocks(t.output) : [];
+
+  return `
+  <div class="task-card">
+    <div class="task-top">
+      <div class="task-title">${escapeHtml(t.title)}</div>
+      <div class="task-pct" style="color:${statusColor[status] || 'var(--brass-500)'}">${t.pct}%</div>
+    </div>
+    <div class="bar-track"><div class="bar-fill" style="width:${t.pct}%;${status==='error' ? 'background:var(--crit);' : ''}"></div></div>
+    <div class="task-meta">
+      <span>${t.model}</span>
+      <span style="color:${statusColor[status] || 'var(--muted)'}">${statusLabel[status] || ''}</span>
+      ${hasOutput ? `<span class="task-view-output" data-task-id="${t.id}">${isExpanded ? 'Hide output' : 'View output'}</span>` : ''}
+    </div>
+    ${t.error ? `<div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--crit);margin-top:8px;">${escapeHtml(t.error)}</div>` : ''}
+    ${hasOutput ? `
+      <div class="task-output ${isExpanded ? 'expanded' : ''}" id="task-output-${t.id}">
+        <div class="task-output-inner">${escapeHtml(t.output)}</div>
+        <button class="task-copy-btn" data-copy-id="${t.id}">Copy</button>
+        ${codeBlocks.length > 0 ? `
+          <div class="code-files">
+            ${codeBlocks.map((cb, i) => `
+              <div class="code-file">
+                <span><span class="code-file-name">${cb.filename}</span><span class="code-file-lang">${cb.lang}</span></span>
+                <button class="code-file-dl" data-task-id="${t.id}" data-block-index="${i}">Download</button>
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+      </div>
+    ` : ''}
+  </div>`;
+}
 
 function renderTasks(){
   const panel = document.getElementById('tasks-panel');
   const statusColor = { queued:'var(--muted)', running:'var(--warn)', complete:'var(--good)', error:'var(--crit)', blocked:'var(--warn)' };
   const statusLabel = { queued:'Queued', running:'Running…', complete:'Complete', error:'Failed', blocked:'Awaiting your input' };
-  panel.innerHTML = `<div class="panel-head"><div class="panel-title">${usingMockTasks ? 'Demo Data' : 'Your Tasks'}</div><div class="panel-count">${tasks.length} total</div></div>` +
-    (tasks.length === 0
-      ? `<div style="padding:30px 20px;color:var(--muted);font-size:13px;">No tasks yet — try + New Prompt on Overview.</div>`
-      : tasks.map(t => {
-        const status = t.status || 'complete'; // mock entries have no status, treat as done for display
-        const hasOutput = !!(t.output && t.output.trim());
-        const isExpanded = expandedTaskIds.has(t.id);
-        return `
-        <div class="task-card">
-          <div class="task-top">
-            <div class="task-title">${escapeHtml(t.title)}</div>
-            <div class="task-pct" style="color:${statusColor[status] || 'var(--brass-500)'}">${t.pct}%</div>
-          </div>
-          <div class="bar-track"><div class="bar-fill" style="width:${t.pct}%;${status==='error' ? 'background:var(--crit);' : ''}"></div></div>
-          <div class="task-meta">
-            <span>${t.model}</span>
-            <span style="color:${statusColor[status] || 'var(--muted)'}">${statusLabel[status] || ''}</span>
-            ${hasOutput ? `<span class="task-view-output" data-task-id="${t.id}">${isExpanded ? 'Hide output' : 'View output'}</span>` : ''}
-          </div>
-          ${t.error ? `<div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--crit);margin-top:8px;">${escapeHtml(t.error)}</div>` : ''}
-          ${hasOutput ? `
-            <div class="task-output ${isExpanded ? 'expanded' : ''}" id="task-output-${t.id}">
-              <div class="task-output-inner">${escapeHtml(t.output)}</div>
-              <button class="task-copy-btn" data-copy-id="${t.id}">Copy</button>
-            </div>
-          ` : ''}
-        </div>`;
-      }).join(''));
 
-  panel.querySelectorAll('.task-view-output').forEach(el => {
+  if(tasks.length === 0){
+    panel.innerHTML = `<div class="panel-head"><div class="panel-title">${usingMockTasks ? 'Demo Data' : 'Your Tasks'}</div><div class="panel-count">0 total</div></div>
+      <div style="padding:30px 20px;color:var(--muted);font-size:13px;">No tasks yet — try + New Prompt on Overview.</div>`;
+    return;
+  }
+
+  // Group consecutive-in-list tasks by planId — undefined/missing planId
+  // (mock data, or anything predating this feature) each become their own
+  // singleton group, which renders identically to the old flat list.
+  const groups = [];
+  const groupIndex = {};
+  tasks.forEach(t => {
+    const key = t.planId || `single_${t.id}`;
+    if(!(key in groupIndex)){
+      groupIndex[key] = groups.length;
+      groups.push({ key, planId: t.planId || null, summary: t.planSummary || null, items: [] });
+    }
+    groups[groupIndex[key]].items.push(t);
+  });
+  groups.forEach(g => g.items.sort((a,b) => (a.stepIndex ?? 0) - (b.stepIndex ?? 0)));
+
+  const body = groups.map(g => {
+    if(g.items.length === 1 || !g.planId){
+      return g.items.map(t => taskCardHTML(t, statusColor, statusLabel)).join('');
+    }
+
+    // Multi-step plan — group under a header with a combined-view toggle.
+    const groupExpanded = expandedGroupIds.has(g.key);
+    const combinedExpanded = expandedCombinedIds.has(g.key);
+    const allCode = g.items.flatMap(t => extractCodeBlocks(t.output || ''));
+    const doneCount = g.items.filter(t => t.status === 'complete').length;
+
+    return `
+    <div class="plan-group">
+      <div class="plan-group-head" data-group-toggle="${g.key}">
+        <div>
+          <div class="plan-group-title">${escapeHtml(g.summary || 'Multi-step task')}</div>
+          <div class="plan-group-count">${doneCount}/${g.items.length} steps complete</div>
+        </div>
+        <div class="task-view-output">${groupExpanded ? 'Collapse ▴' : 'Expand ▾'}</div>
+      </div>
+      ${groupExpanded ? `
+        <div style="padding:16px 20px 4px;">
+          ${g.items.map(t => taskCardHTML(t, statusColor, statusLabel)).join('')}
+          <button class="plan-group-combined-btn" data-combined-toggle="${g.key}">${combinedExpanded ? 'Hide combined view' : 'View combined output'}</button>
+          ${allCode.length > 0 ? `<button class="download-all-btn" data-download-all="${g.key}" style="margin-left:8px;">Download all code (${allCode.length} file${allCode.length===1?'':'s'})</button>` : ''}
+        </div>
+        <div class="combined-view ${combinedExpanded ? 'expanded' : ''}">
+          <div class="combined-view-inner">
+            ${g.items.filter(t => t.output && t.output.trim()).map(t => `
+              <div class="combined-step">
+                <div class="combined-step-title">${escapeHtml(t.title)} — ${t.model}</div>
+                <div class="combined-step-body">${escapeHtml(t.output)}</div>
+              </div>
+            `).join('') || `<p style="color:var(--muted);font-size:12.5px;">No output yet from this plan's steps.</p>`}
+          </div>
+        </div>
+      ` : ''}
+    </div>`;
+  }).join('');
+
+  panel.innerHTML = `<div class="panel-head"><div class="panel-title">${usingMockTasks ? 'Demo Data' : 'Your Tasks'}</div><div class="panel-count">${tasks.length} total</div></div>${body}`;
+
+  panel.querySelectorAll('[data-group-toggle]').forEach(el => {
+    el.addEventListener('click', () => {
+      const key = el.dataset.groupToggle;
+      if(expandedGroupIds.has(key)) expandedGroupIds.delete(key); else expandedGroupIds.add(key);
+      renderTasks();
+    });
+  });
+
+  panel.querySelectorAll('[data-combined-toggle]').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const key = el.dataset.combinedToggle;
+      if(expandedCombinedIds.has(key)) expandedCombinedIds.delete(key); else expandedCombinedIds.add(key);
+      renderTasks();
+    });
+  });
+
+  panel.querySelectorAll('[data-download-all]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const g = groups.find(x => x.key === btn.dataset.downloadAll);
+      if(!g) return;
+      const allCode = g.items.flatMap(t => extractCodeBlocks(t.output || ''));
+      allCode.forEach((cb, i) => setTimeout(() => downloadTextFile(cb.filename, cb.code), i * 200));
+    });
+  });
+
+  panel.querySelectorAll('.task-view-output[data-task-id]').forEach(el => {
     el.addEventListener('click', () => {
       const id = el.dataset.taskId;
       if(expandedTaskIds.has(id)) expandedTaskIds.delete(id); else expandedTaskIds.add(id);
@@ -1330,6 +1526,16 @@ function renderTasks(){
         btn.textContent = 'Copied!';
         setTimeout(() => { btn.textContent = original; }, 1500);
       }).catch(() => alert('Could not copy — your browser may be blocking clipboard access.'));
+    });
+  });
+
+  panel.querySelectorAll('.code-file-dl').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const t = tasks.find(x => String(x.id) === String(btn.dataset.taskId));
+      if(!t) return;
+      const blocks = extractCodeBlocks(t.output || '');
+      const cb = blocks[Number(btn.dataset.blockIndex)];
+      if(cb) downloadTextFile(cb.filename, cb.code);
     });
   });
 }
@@ -1381,6 +1587,7 @@ setInterval(() => {
 
 // ---------- New Prompt / Auto-decompose ----------
 let currentPlan = [];
+let currentPromptText = '';
 
 function openModal(){
   document.getElementById('modal-overlay').classList.add('open');
@@ -1411,6 +1618,7 @@ function runDecompose(){
 
   setTimeout(() => {
     currentPlan = decompose(val);
+    currentPromptText = val;
     renderModalPlan(val);
   }, 950);
 }
@@ -1562,6 +1770,8 @@ async function confirmPlan(){
   }
 
   const plan = currentPlan.slice(); // freeze the list before we start mutating UI state
+  const planId = `plan_${Date.now()}_${Math.random().toString(36).slice(2,7)}`;
+  const promptSummary = currentPromptText || plan[0]?.title || 'Task';
   closeModal();
 
   // Jump to Tasks now — real-time listeners will populate cards as each
@@ -1576,9 +1786,10 @@ async function confirmPlan(){
   // no need to reason about which steps could safely run in parallel.
   for(const p of plan){
     const modelName = modelById(p.model)?.name || p.model;
+    const stepIndex = plan.indexOf(p);
     let taskId;
     try{
-      taskId = await window.firestoreAddTask({ title: p.title, model: modelName, pct: 0, status: 'queued' });
+      taskId = await window.firestoreAddTask({ title: p.title, model: modelName, pct: 0, status: 'queued', planId, planSummary: promptSummary, planSteps: plan.length, stepIndex });
     } catch(err){
       console.error("Couldn't create task:", err);
       continue; // move on rather than aborting the whole plan over one write failure
