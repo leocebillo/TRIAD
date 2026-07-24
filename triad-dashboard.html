@@ -330,6 +330,35 @@
     cursor:pointer;background:transparent;
   }
   .code-file-dl:hover{background:rgba(227,195,131,0.1);}
+  .asset-dl-link{
+    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.5px;
+    padding:6px 14px;border-radius:20px;border:1px solid var(--brass-700);color:var(--brass-400);
+    cursor:pointer;background:transparent;white-space:nowrap;
+  }
+  .asset-dl-link:hover{background:rgba(227,195,131,0.1);}
+  .code-file-preview{
+    font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.5px;
+    padding:4px 11px;border-radius:20px;border:1px solid var(--good);color:var(--good);
+    cursor:pointer;background:transparent;margin-left:6px;
+  }
+  .code-file-preview:hover{background:rgba(143,174,138,0.1);}
+
+  .research-backing{
+    margin-top:12px;background:var(--ink-900);border:1px solid var(--line);border-left:2px solid var(--brass-700);
+    border-radius:0 6px 6px 0;padding:12px 14px;
+  }
+  .research-backing-label{
+    font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.5px;color:var(--brass-500);
+    text-transform:uppercase;margin-bottom:6px;display:block;
+  }
+  .research-backing-body{font-size:12.5px;line-height:1.7;color:var(--muted);white-space:pre-wrap;}
+
+  .asset-card{
+    margin-top:12px;background:var(--ink-900);border:1px solid var(--brass-700);border-radius:8px;
+    padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px;
+  }
+  .asset-card-label{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--brass-400);}
+  .asset-card-type{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted-dim);margin-top:2px;}
   .download-all-btn{
     font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.5px;
     padding:7px 14px;border-radius:6px;cursor:pointer;border:none;margin-top:10px;
@@ -437,6 +466,19 @@
     padding:5px 10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--brass-300);
     cursor:pointer;
   }
+  .cat-check{
+    display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:11px;
+    color:var(--muted);border:1px solid var(--line);border-radius:20px;padding:5px 12px 5px 8px;
+    cursor:pointer;user-select:none;
+  }
+  .cat-check input{accent-color:var(--brass-700);cursor:pointer;}
+  .cat-check:has(input:checked){color:var(--brass-400);border-color:var(--brass-700);background:rgba(227,195,131,0.06);}
+  .cat-pill{
+    display:inline-flex;align-items:center;font-family:'JetBrains Mono',monospace;font-size:9.5px;
+    letter-spacing:0.3px;padding:2px 8px;border-radius:20px;border:1px solid var(--line);
+    color:var(--muted-dim);margin-right:4px;margin-top:4px;
+  }
+  .cat-pill.on{color:var(--brass-400);border-color:var(--brass-700);}
   .plan-deps{
     font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted-dim);
     margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);
@@ -620,11 +662,14 @@
           <input class="prompt-textarea" id="as-capability" style="min-height:auto;padding:10px 13px;" placeholder="e.g. Video generation">
         </div>
         <div class="field">
-          <label>Category</label>
-          <select id="as-category" onchange="toggleAddServiceFields()" style="width:100%;background:var(--ink-800);border:1px solid var(--line);border-radius:6px;padding:9px 11px;color:var(--brass-300);font-family:'JetBrains Mono',monospace;font-size:12.5px;">
-            <option value="tool">Tool (image/video/audio gen, etc — used for specific tasks)</option>
-            <option value="reasoning">Reasoning model (can handle general prompts, needs an API endpoint)</option>
-          </select>
+          <label>What is it good at? (check all that apply)</label>
+          <div id="as-categories" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;">
+            <label class="cat-check"><input type="checkbox" value="research" onchange="toggleAddServiceFields()"> Research</label>
+            <label class="cat-check"><input type="checkbox" value="coding" onchange="toggleAddServiceFields()"> Coding</label>
+            <label class="cat-check"><input type="checkbox" value="conversational" onchange="toggleAddServiceFields()"> Conversational</label>
+            <label class="cat-check"><input type="checkbox" value="creation" onchange="toggleAddServiceFields()"> Creation</label>
+          </div>
+          <p class="prompt-hint">Research, Coding, and Conversational all need an API endpoint below (the model handles general prompts). Creation-only services (image/video/audio generators) don't.</p>
         </div>
         <div id="as-endpoint-fields" style="display:none;">
           <div class="field">
@@ -877,9 +922,9 @@
     return workerFetch("/remove-key", { service });
   };
 
-  window.callModelBackend = async (service, prompt, taskId) => {
-    const data = await workerFetch("/call-model", { service, prompt, taskId });
-    return data; // { output, usage }
+  window.callModelBackend = async (service, prompt, taskId, category) => {
+    const data = await workerFetch("/call-model", { service, prompt, taskId, category });
+    return data; // { output, usage, needsInput?, question?, assetUrl?, assetType? }
   };
 
   window.getUsageBackend = async () => workerGet("/usage");
@@ -888,18 +933,25 @@
 <script>
 
 // ---------- Mock data ----------
+// Four categories every step gets classified into: research, coding,
+// conversational, creation. Each service declares which it's good at —
+// this is what New Prompt actually routes against now, instead of loose
+// keyword-sniffing. Editable per-service in Settings.
+const CATEGORIES = ['research','coding','conversational','creation'];
+const CATEGORY_LABELS = { research:'Research', coding:'Coding', conversational:'Conversational', creation:'Creation' };
+
 const models = [
-  { id:'claude',   name:'Claude',   swatch:'#e3c383', weight:7,    used:62, limit:100, reset: 14*60, type:'core', capability:'Reasoning & code', hasRealUsage:false, builtin:true },
-  { id:'chatgpt',  name:'ChatGPT',  swatch:'#c9a469', weight:5.25, used:38, limit:100, reset: 42*60, type:'core', capability:'Reasoning & writing', hasRealUsage:false, builtin:true },
-  { id:'gemini',   name:'Gemini',   swatch:'#9c7b45', weight:3.75, used:21, limit:100, reset: 55*60, type:'core', capability:'Reasoning & multimodal', hasRealUsage:false, noHeaders:true, builtin:true },
-  { id:'groq',     name:'Groq',     swatch:'#7a8fa6', weight:5,    used:0,  limit:100, reset: 60*60, type:'core', capability:'Fast open-source models (free)', hasRealUsage:false, builtin:true },
-  { id:'mistral',  name:'Mistral',  swatch:'#a67a8f', weight:4,    used:0,  limit:100, reset: 60*60, type:'core', capability:'Reasoning & code (free)', hasRealUsage:false, noHeaders:true, builtin:true },
-  { id:'workers-ai', name:'Workers AI', swatch:'#8fa67a', weight:3, used:0, limit:100, reset: 60*60, type:'core', capability:'Runs on your Worker (free, no key)', hasRealUsage:false, noHeaders:true, noKeyNeeded:true, builtin:true },
+  { id:'claude',   name:'Claude',   swatch:'#e3c383', weight:7,    used:62, limit:100, reset: 14*60, type:'core', capability:'Reasoning & code', hasRealUsage:false, builtin:true, categories:['research','coding','conversational'] },
+  { id:'chatgpt',  name:'ChatGPT',  swatch:'#c9a469', weight:5.25, used:38, limit:100, reset: 42*60, type:'core', capability:'Reasoning & writing', hasRealUsage:false, builtin:true, categories:['research','coding','conversational'] },
+  { id:'gemini',   name:'Gemini',   swatch:'#9c7b45', weight:3.75, used:21, limit:100, reset: 55*60, type:'core', capability:'Reasoning & multimodal', hasRealUsage:false, noHeaders:true, builtin:true, categories:['research','coding','conversational'] },
+  { id:'groq',     name:'Groq',     swatch:'#7a8fa6', weight:5,    used:0,  limit:100, reset: 60*60, type:'core', capability:'Fast open-source models (free)', hasRealUsage:false, builtin:true, categories:['coding','conversational'] },
+  { id:'mistral',  name:'Mistral',  swatch:'#a67a8f', weight:4,    used:0,  limit:100, reset: 60*60, type:'core', capability:'Reasoning & code (free)', hasRealUsage:false, noHeaders:true, builtin:true, categories:['coding','conversational'] },
+  { id:'workers-ai', name:'Workers AI', swatch:'#8fa67a', weight:3, used:0, limit:100, reset: 60*60, type:'core', capability:'Runs on your Worker (free, no key)', hasRealUsage:false, noHeaders:true, noKeyNeeded:true, builtin:true, categories:['conversational'] },
 ];
 
 const tools = [
-  { id:'meshy',  name:'Meshy',  swatch:'#6f9c95', type:'tool', capability:'3D asset generation', creditsUsed:340, creditsLimit:1000, builtin:true },
-  { id:'suno',   name:'Suno',   swatch:'#b5806a', type:'tool', capability:'Music & audio generation', creditsUsed:12,  creditsLimit:50, builtin:true },
+  { id:'meshy',  name:'Meshy',  swatch:'#6f9c95', type:'tool', capability:'3D asset generation', creditsUsed:340, creditsLimit:1000, builtin:true, categories:['creation'] },
+  { id:'suno',   name:'Suno',   swatch:'#b5806a', type:'tool', capability:'Music & audio generation', creditsUsed:12,  creditsLimit:50, builtin:true, categories:['creation'] },
 ];
 
 const registry = () => [...models, ...tools];
@@ -1012,6 +1064,26 @@ function resolveModelForTask(proposedId){
   const order = routingSettings.fallbackOrder;
   const fallback = order.find(id => isConnected(id));
   return fallback || proposedId; // nothing connected — caller will surface the error
+}
+
+// Category-aware resolution: picks a connected service that actually
+// declares the given category, respecting your default model / fallback
+// order when they apply, rather than just falling back to whatever's
+// connected regardless of whether it's suited for the job.
+function resolveModelForCategory(category){
+  const inCategory = id => {
+    const s = modelById(id);
+    return s && (s.categories || []).includes(category) && isConnected(id);
+  };
+
+  if(routingSettings.defaultModel !== 'auto' && inCategory(routingSettings.defaultModel)){
+    return routingSettings.defaultModel;
+  }
+  const fromFallback = routingSettings.fallbackOrder.find(inCategory);
+  if(fromFallback) return fromFallback;
+
+  const anyMatch = registry().find(s => (s.categories || []).includes(category) && isConnected(s.id));
+  return anyMatch ? anyMatch.id : null; // null = genuinely nothing connected for this category
 }
 
 // ---------- Gauges ----------
@@ -1264,7 +1336,8 @@ function renderRequests(){
         if(req.taskId && req.originalPrompt){
           btn.textContent = 'Resuming task…';
           const resumedPrompt = `${req.originalPrompt}\n\n---\nYou previously asked: "${req.text}"\nThe user's answer: "${req.response}"\n\nContinue and complete the original task using this information.`;
-          await runTaskStep(req.taskId, req.model, resumedPrompt, req.originalPrompt);
+          const linkedTask = tasks.find(t => String(t.id) === String(req.taskId));
+          await runTaskStep(req.taskId, req.model, resumedPrompt, req.originalPrompt, linkedTask?.category || 'conversational');
         }
       } catch(err){
         alert(`Couldn't complete this: ${err.message}`);
@@ -1366,6 +1439,37 @@ function downloadTextFile(filename, content){
   URL.revokeObjectURL(url);
 }
 
+// Opens actual rendered HTML in a new tab — for a coding task that produced
+// a full page or fragment, this is the "show me what it looks like" piece.
+// The Blob is revoked on a short delay rather than immediately, since the
+// new tab needs a moment to actually load the URL before it disappears.
+function openHtmlPreview(code){
+  const blob = new Blob([code], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const win = window.open(url, '_blank');
+  if(!win){
+    alert('Your browser blocked the preview popup — allow popups for this site to use Preview.');
+  }
+  setTimeout(() => URL.revokeObjectURL(url), 30000);
+}
+
+// Splits a research task's raw output into the direct answer and the
+// honest reasoning/confidence section the model was asked to append —
+// see the "REASONING & BACKING:" instruction added server-side for
+// category === 'research'. If the model didn't follow the format (smaller
+// models sometimes won't), this just returns the whole thing as the answer
+// with no backing section, rather than mangling anything.
+function parseResearchOutput(output){
+  const marker = /REASONING\s*&\s*BACKING:?/i;
+  const match = output.match(marker);
+  if(!match) return { answer: output, backing: null };
+  const idx = match.index;
+  return {
+    answer: output.slice(0, idx).trim(),
+    backing: output.slice(idx + match[0].length).trim(),
+  };
+}
+
 function escapeHtml(str){
   const div = document.createElement('div');
   div.textContent = str == null ? '' : String(str);
@@ -1380,7 +1484,9 @@ function taskCardHTML(t, statusColor, statusLabel){
   const status = t.status || 'complete';
   const hasOutput = !!(t.output && t.output.trim());
   const isExpanded = expandedTaskIds.has(t.id);
-  const codeBlocks = hasOutput ? extractCodeBlocks(t.output) : [];
+  const category = t.category || 'conversational';
+  const codeBlocks = (hasOutput && category === 'coding') ? extractCodeBlocks(t.output) : [];
+  const research = (hasOutput && category === 'research') ? parseResearchOutput(t.output) : null;
 
   return `
   <div class="task-card">
@@ -1391,20 +1497,48 @@ function taskCardHTML(t, statusColor, statusLabel){
     <div class="bar-track"><div class="bar-fill" style="width:${t.pct}%;${status==='error' ? 'background:var(--crit);' : ''}"></div></div>
     <div class="task-meta">
       <span>${t.model}</span>
+      ${t.category ? `<span class="cat-pill on">${CATEGORY_LABELS[category] || category}</span>` : ''}
       <span style="color:${statusColor[status] || 'var(--muted)'}">${statusLabel[status] || ''}</span>
       ${hasOutput ? `<span class="task-view-output" data-task-id="${t.id}">${isExpanded ? 'Hide output' : 'View output'}</span>` : ''}
     </div>
     ${t.error ? `<div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--crit);margin-top:8px;">${escapeHtml(t.error)}</div>` : ''}
+
+    ${t.assetUrl ? `
+      <div class="asset-card">
+        <div>
+          <div class="asset-card-label">Generated ${t.assetType === 'audio' ? 'audio' : t.assetType === 'model' ? '3D model' : 'file'}</div>
+          <div class="asset-card-type">${t.assetType || 'file'}</div>
+        </div>
+        <a href="${t.assetUrl}" target="_blank" rel="noopener" class="asset-dl-link" style="text-decoration:none;">Download asset</a>
+      </div>
+    ` : ''}
+
     ${hasOutput ? `
       <div class="task-output ${isExpanded ? 'expanded' : ''}" id="task-output-${t.id}">
-        <div class="task-output-inner">${escapeHtml(t.output)}</div>
+
+        ${research ? `
+          <div class="task-output-inner">${escapeHtml(research.answer)}</div>
+          ${research.backing ? `
+            <div class="research-backing">
+              <span class="research-backing-label">Reasoning &amp; Backing</span>
+              <div class="research-backing-body">${escapeHtml(research.backing)}</div>
+            </div>
+          ` : `<p style="color:var(--muted-dim);font-size:11.5px;margin-top:8px;">This model didn't return a separate reasoning/backing section in the expected format — shown as-is.</p>`}
+        ` : `
+          <div class="task-output-inner">${escapeHtml(t.output)}</div>
+        `}
+
         <button class="task-copy-btn" data-copy-id="${t.id}">Copy</button>
+
         ${codeBlocks.length > 0 ? `
           <div class="code-files">
             ${codeBlocks.map((cb, i) => `
               <div class="code-file">
                 <span><span class="code-file-name">${cb.filename}</span><span class="code-file-lang">${cb.lang}</span></span>
-                <button class="code-file-dl" data-task-id="${t.id}" data-block-index="${i}">Download</button>
+                <span>
+                  <button class="code-file-dl" data-task-id="${t.id}" data-block-index="${i}">Download</button>
+                  ${cb.lang === 'html' ? `<button class="code-file-preview" data-task-id="${t.id}" data-block-index="${i}">Preview</button>` : ''}
+                </span>
               </div>
             `).join('')}
           </div>
@@ -1538,6 +1672,16 @@ function renderTasks(){
       if(cb) downloadTextFile(cb.filename, cb.code);
     });
   });
+
+  panel.querySelectorAll('.code-file-preview').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const t = tasks.find(x => String(x.id) === String(btn.dataset.taskId));
+      if(!t) return;
+      const blocks = extractCodeBlocks(t.output || '');
+      const cb = blocks[Number(btn.dataset.blockIndex)];
+      if(cb) openHtmlPreview(cb.code);
+    });
+  });
 }
 
 // ---------- Real-time Firestore data taking over from mock ----------
@@ -1626,68 +1770,133 @@ function runDecompose(){
 // Mock orchestrator: in the real build this call itself goes to a model (e.g. Claude)
 // with the full registry (name + capability of every connected service) in its system
 // prompt, and it returns this exact shape — subtasks, assigned service, and why.
+// ---------- Category classification ----------
+// Scores a prompt against each category's signal words and picks the
+// strongest match. Conversational is the default when nothing else scores
+// higher — a plain question or chat-style request should land there, not
+// get force-fit into research or coding just because it used a stray word.
+const CATEGORY_PATTERNS = {
+  research: /\b(research|investigate|compare|find out|look up|evidence|studies|study|pros and cons|analysis|analyze|history of|current state of|latest (news|developments)|what happened|difference between|is it true)\b/gi,
+  coding: /\b(code|coding|program(?:ming|mer)?|script|function|debug|website|webpage|web page|homepage|app|application|api|html|css|javascript|python|build (?:a|an|me)|develop|repository|repo|algorithm|component|database)\b/gi,
+  // No 'g' flag on these three — they're only ever used with .test(), and a
+  // global-flagged regex used with .test() is stateful (advances lastIndex
+  // between calls), which would silently flip results every other call.
+  creation3d: /\b(3d|model(?:ing)?|mesh|asset|character model|prop|blender|sculpt)\b/i,
+  creationMusic: /\b(song|music|theme|soundtrack|audio|jingle|score|melody|beat)\b/i,
+  creationGeneric: /\b(generate (?:an?|the) (?:image|picture|art|texture|logo|artwork))\b/i,
+};
+
+function classifyPrompt(prompt){
+  const research = (prompt.match(CATEGORY_PATTERNS.research) || []).length;
+  const coding = (prompt.match(CATEGORY_PATTERNS.coding) || []).length;
+  const wants3D = CATEGORY_PATTERNS.creation3d.test(prompt);
+  const wantsMusic = CATEGORY_PATTERNS.creationMusic.test(prompt);
+  const wantsGenericCreation = CATEGORY_PATTERNS.creationGeneric.test(prompt);
+  const creation = (wants3D || wantsMusic || wantsGenericCreation) ? 1 : 0;
+
+  const scores = { research, coding, creation };
+  const top = Object.entries(scores).sort((a,b) => b[1]-a[1])[0];
+
+  return {
+    category: top[1] > 0 ? top[0] : 'conversational',
+    wants3D, wantsMusic, wantsGenericCreation,
+  };
+}
+
 function decompose(prompt){
-  const p = prompt.toLowerCase();
-  const plan = [];
-
-  const wants3D = /3d|model(?:ing)?|mesh|asset|character|prop|blender/.test(p);
-  const wantsMusic = /song|music|theme|soundtrack|audio|jingle|score/.test(p);
-
-  // Capability-specific tools (Meshy/Suno) still route by capability
-  // regardless of the default-model setting — a reasoning model can't
-  // substitute for text-to-3D or text-to-music, so these never fall back
-  // to one even if disconnected; they just get flagged instead.
-  if(wants3D){
-    const connected = isConnected('meshy');
-    plan.push({
-      title: `Generate 3D asset for: ${prompt}`,
-      model: 'meshy',
-      why: connected
-        ? 'Matched by capability — Meshy specializes in text-to-3D asset generation, none of the reasoning models can output geometry.'
-        : 'Matched by capability, but Meshy isn\'t connected yet — add a key in Settings before this step can actually run.',
-    });
-  }
-  if(wantsMusic){
-    const connected = isConnected('suno');
-    plan.push({
-      title: `Generate audio/theme for: ${prompt}`,
-      model: 'suno',
-      why: connected
-        ? 'Matched by capability — Suno specializes in music generation, routed here instead of a text model.'
-        : 'Matched by capability, but Suno isn\'t connected yet — add a key in Settings before this step can actually run.',
-    });
-  }
-
-  // For the reasoning pass(es), a chosen default model overrides the usual
-  // capability-based split — if you've told Settings "always use Groq,"
-  // that's what shows up here instead of the default claude/gemini/chatgpt split.
+  const { category, wants3D, wantsMusic, wantsGenericCreation } = classifyPrompt(prompt);
   const usingDefault = routingSettings.defaultModel !== 'auto';
-  const defaultChoice = usingDefault ? resolveModelForTask(routingSettings.defaultModel) : null;
-  const defaultName = usingDefault ? modelById(defaultChoice)?.name : null;
 
-  if(wants3D || wantsMusic){
-    plan.push({
-      title: `Integrate & write supporting content for: ${prompt}`,
-      model: usingDefault ? defaultChoice : resolveModelForTask('claude'),
-      why: usingDefault
-        ? `Using your default model (${defaultName}) — set in Settings → Routing.`
-        : 'Handles the surrounding build — wiring the generated asset in, writing any copy around it.',
-    });
-  } else if(usingDefault){
-    plan.push({
-      title: `${prompt}`,
-      model: defaultChoice,
-      why: `Using your default model (${defaultName}) — set in Settings → Routing. Switch it back to Auto to get a capability-based split instead.`,
-    });
-  } else {
-    plan.push(
-      { title: `Scope & structure: ${prompt}`, model: resolveModelForTask('gemini'), why: 'Turns a loose request into a concrete outline before anything gets built.' },
-      { title: `Core build for: ${prompt}`, model: resolveModelForTask('claude'), why: 'Handles the actual implementation — strongest fit for structured, correct code.' },
-      { title: `Review & catch edge cases`, model: resolveModelForTask('chatgpt'), why: 'Fresh second pass over the build — flags what the builder missed.' },
-    );
+  // ---------- Creation ----------
+  if(category === 'creation'){
+    let toolId, why;
+    if(wants3D){
+      toolId = 'meshy';
+      why = isConnected('meshy')
+        ? 'Matched as Creation — Meshy specializes in text-to-3D asset generation.'
+        : 'Matched as Creation (3D), but Meshy isn\'t connected — add a key in Settings.';
+    } else if(wantsMusic){
+      toolId = 'suno';
+      why = isConnected('suno')
+        ? 'Matched as Creation — Suno specializes in music/audio generation.'
+        : 'Matched as Creation (music), but Suno isn\'t connected — add a key in Settings.';
+    } else {
+      toolId = resolveModelForCategory('creation');
+      why = toolId
+        ? `Matched as Creation — routed to ${modelById(toolId)?.name}, the connected service tagged for this category.`
+        : 'Matched as Creation, but nothing connected is tagged for it — connect or tag a service under Creation in Settings.';
+    }
+    return [{
+      title: `Create: ${prompt}`,
+      model: toolId || (wants3D ? 'meshy' : wantsMusic ? 'suno' : 'meshy'),
+      category: 'creation',
+      why,
+    }];
   }
 
-  return plan;
+  // ---------- Research ----------
+  if(category === 'research'){
+    const modelId = usingDefault && modelById(routingSettings.defaultModel)?.categories?.includes('research')
+      ? routingSettings.defaultModel
+      : resolveModelForCategory('research');
+    return [{
+      title: `Research: ${prompt}`,
+      model: modelId || 'claude',
+      category: 'research',
+      why: modelId
+        ? `Routed to ${modelById(modelId)?.name} for Research — will answer directly, then account for its own confidence and reasoning separately.`
+        : 'No connected service is tagged for Research — connect one or tag it in Settings.',
+    }];
+  }
+
+  // ---------- Coding ----------
+  if(category === 'coding'){
+    if(usingDefault && modelById(routingSettings.defaultModel)?.categories?.includes('coding')){
+      const name = modelById(routingSettings.defaultModel)?.name;
+      return [{
+        title: `${prompt}`,
+        model: routingSettings.defaultModel,
+        category: 'coding',
+        why: `Using your default model (${name}) — set in Settings → Routing.`,
+      }];
+    }
+    // No forced default — spread the usual scope/build/review split across
+    // whichever Coding-tagged services are connected, rotating through them
+    // for variety when more than one is available.
+    const candidates = registry().filter(s => (s.categories||[]).includes('coding') && isConnected(s.id));
+    const pick = i => candidates.length ? candidates[i % candidates.length].id : null;
+    const steps = [
+      { title: `Scope & structure: ${prompt}`, model: pick(0), why: 'Turns a loose request into a concrete outline before anything gets built.' },
+      { title: `Core build for: ${prompt}`, model: pick(1), why: 'Handles the actual implementation.' },
+      { title: `Review & catch edge cases`, model: pick(2), why: 'Fresh pass over the build — flags what the builder missed.' },
+    ];
+    return steps.map(s => ({ ...s, category:'coding', model: s.model || 'claude',
+      why: s.model ? s.why : 'No connected service is tagged for Coding — connect one or tag it in Settings.' }));
+  }
+
+  // ---------- Conversational (default) ----------
+  const modelId = usingDefault && modelById(routingSettings.defaultModel)?.categories?.includes('conversational')
+    ? routingSettings.defaultModel
+    : resolveModelForCategory('conversational');
+  return [{
+    title: `${prompt}`,
+    model: modelId || 'claude',
+    category: 'conversational',
+    why: modelId
+      ? `Routed to ${modelById(modelId)?.name} for Conversational — a direct, plain-language response.`
+      : 'No connected service is tagged for Conversational — connect one or tag it in Settings.',
+  }];
+}
+
+function modelOptionsHTML(step){
+  const all = registry();
+  const recommended = all.filter(s => (s.categories||[]).includes(step.category));
+  const other = all.filter(s => !(s.categories||[]).includes(step.category));
+  const opt = s => `<option value="${s.id}" ${step.model===s.id?'selected':''}>${s.name}${isConnected(s.id)?'':' (not connected)'}</option>`;
+  return `
+    ${recommended.length ? `<optgroup label="Recommended for ${CATEGORY_LABELS[step.category]}">${recommended.map(opt).join('')}</optgroup>` : ''}
+    ${other.length ? `<optgroup label="Other">${other.map(opt).join('')}</optgroup>` : ''}
+  `;
 }
 
 function renderModalPlan(originalPrompt){
@@ -1696,23 +1905,15 @@ function renderModalPlan(originalPrompt){
     ${currentPlan.map((p, i) => `
       <div class="plan-item">
         <div class="plan-item-top">
-          <div class="plan-item-title">${p.title}</div>
+          <div>
+            <div class="plan-item-title">${escapeHtml(p.title)}</div>
+            <span class="cat-pill on" style="margin-top:6px;">${CATEGORY_LABELS[p.category] || 'Conversational'}</span>
+          </div>
           <select class="model-select" onchange="reassign(${i}, this.value)">
-            <optgroup label="Reasoning">
-              <option value="claude" ${p.model==='claude'?'selected':''}>Claude</option>
-              <option value="chatgpt" ${p.model==='chatgpt'?'selected':''}>ChatGPT</option>
-              <option value="gemini" ${p.model==='gemini'?'selected':''}>Gemini</option>
-              <option value="groq" ${p.model==='groq'?'selected':''}>Groq (free)</option>
-              <option value="mistral" ${p.model==='mistral'?'selected':''}>Mistral (free)</option>
-              <option value="workers-ai" ${p.model==='workers-ai'?'selected':''}>Workers AI (free)</option>
-            </optgroup>
-            <optgroup label="Tools">
-              <option value="meshy" ${p.model==='meshy'?'selected':''}>Meshy</option>
-              <option value="suno" ${p.model==='suno'?'selected':''}>Suno</option>
-            </optgroup>
+            ${modelOptionsHTML(p)}
           </select>
         </div>
-        <div class="plan-item-why">${p.why}</div>
+        <div class="plan-item-why">${escapeHtml(p.why)}</div>
         ${i > 0 ? `<div class="plan-deps">runs after step ${i}</div>` : `<div class="plan-deps">starts immediately</div>`}
       </div>
     `).join('')}
@@ -1732,11 +1933,11 @@ function reassign(index, modelId){
 // and a real Request gets created), or an error. Shared between confirmPlan
 // and resumeTaskFromRequest, since "run this prompt against this model and
 // react to what comes back" is the same operation either way.
-async function runTaskStep(taskId, modelId, promptText, title){
+async function runTaskStep(taskId, modelId, promptText, title, category){
   const modelName = modelById(modelId)?.name || modelId;
   try{
     await window.firestoreUpdateTask(taskId, { status:'running', pct:10 });
-    const result = await window.callModelBackend(modelId, promptText, taskId);
+    const result = await window.callModelBackend(modelId, promptText, taskId, category);
 
     if(result.needsInput){
       await window.firestoreUpdateTask(taskId, { status:'blocked', pct:10 });
@@ -1754,7 +1955,9 @@ async function runTaskStep(taskId, modelId, promptText, title){
       return;
     }
 
-    await window.firestoreUpdateTask(taskId, { status:'complete', pct:100, output: result.output || '' });
+    const updates = { status:'complete', pct:100, output: result.output || '' };
+    if(result.assetUrl){ updates.assetUrl = result.assetUrl; updates.assetType = result.assetType || 'file'; }
+    await window.firestoreUpdateTask(taskId, updates);
     const preview = (result.output || '').slice(0, 140).replace(/\s+/g,' ').trim();
     await window.firestoreAddLog({ model: modelId, text: `Completed: ${title}${preview ? ' — “' + preview + (result.output.length > 140 ? '…' : '') + '”' : ''}` });
   } catch(err){
@@ -1789,7 +1992,7 @@ async function confirmPlan(){
     const stepIndex = plan.indexOf(p);
     let taskId;
     try{
-      taskId = await window.firestoreAddTask({ title: p.title, model: modelName, pct: 0, status: 'queued', planId, planSummary: promptSummary, planSteps: plan.length, stepIndex });
+      taskId = await window.firestoreAddTask({ title: p.title, model: modelName, pct: 0, status: 'queued', planId, planSummary: promptSummary, planSteps: plan.length, stepIndex, category: p.category || 'conversational' });
     } catch(err){
       console.error("Couldn't create task:", err);
       continue; // move on rather than aborting the whole plan over one write failure
@@ -1801,7 +2004,7 @@ async function confirmPlan(){
       continue;
     }
 
-    await runTaskStep(taskId, p.model, p.title, p.title);
+    await runTaskStep(taskId, p.model, p.title, p.title, p.category || 'conversational');
   }
 }
 
@@ -1874,6 +2077,7 @@ function renderServices(){
           ${!s.builtin ? `<span class="service-type-badge" style="color:var(--brass-500);border-color:var(--brass-700);">custom</span>` : ''}
         </div>
         <span class="service-cap">${s.capability}</span>
+        <div>${CATEGORIES.map(c => `<span class="cat-pill ${(s.categories||[]).includes(c) ? 'on' : ''}" data-cat-toggle="${s.id}" data-cat="${c}" style="cursor:pointer;">${CATEGORY_LABELS[c]}</span>`).join('')}</div>
         ${s.noKeyNeeded
           ? `<div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted-dim);display:flex;justify-content:space-between;align-items:center;gap:10px;">
               <span>Enabled via Cloudflare AI binding — nothing to paste here.</span>
@@ -1920,6 +2124,22 @@ function renderServices(){
   }
 
   list.innerHTML = html;
+
+  list.querySelectorAll('[data-cat-toggle]').forEach(pill => {
+    pill.addEventListener('click', () => {
+      const s = modelById(pill.dataset.catToggle);
+      const cat = pill.dataset.cat;
+      if(!s) return;
+      s.categories = s.categories || [];
+      if(s.categories.includes(cat)){
+        s.categories = s.categories.filter(c => c !== cat);
+      } else {
+        s.categories.push(cat);
+      }
+      renderServices();
+      renderRoutingSettings();
+    });
+  });
 }
 
 function saveKey(id){
@@ -1996,7 +2216,7 @@ function openAddServiceModal(){
   document.getElementById('add-service-overlay').classList.add('open');
   document.getElementById('as-name').value = '';
   document.getElementById('as-capability').value = '';
-  document.getElementById('as-category').value = 'tool';
+  document.querySelectorAll('#as-categories input[type=checkbox]').forEach(cb => cb.checked = false);
   document.getElementById('as-baseurl').value = '';
   document.getElementById('as-model').value = '';
   document.getElementById('as-key').value = '';
@@ -2005,35 +2225,44 @@ function openAddServiceModal(){
 function closeAddServiceModal(){
   document.getElementById('add-service-overlay').classList.remove('open');
 }
+function getCheckedCategories(containerId){
+  return Array.from(document.querySelectorAll(`#${containerId} input[type=checkbox]:checked`)).map(cb => cb.value);
+}
 function toggleAddServiceFields(){
-  const isReasoning = document.getElementById('as-category').value === 'reasoning';
-  document.getElementById('as-endpoint-fields').style.display = isReasoning ? 'block' : 'none';
+  const checked = getCheckedCategories('as-categories');
+  const needsEndpoint = checked.some(c => c !== 'creation'); // research/coding/conversational all need one
+  document.getElementById('as-endpoint-fields').style.display = needsEndpoint ? 'block' : 'none';
 }
 
 function submitAddService(){
   const name = document.getElementById('as-name').value.trim();
   const capability = document.getElementById('as-capability').value.trim() || 'General purpose';
-  const category = document.getElementById('as-category').value; // 'reasoning' | 'tool'
+  const categories = getCheckedCategories('as-categories');
   const baseUrl = document.getElementById('as-baseurl').value.trim();
   const modelId = document.getElementById('as-model').value.trim();
   const key = document.getElementById('as-key').value.trim();
 
   if(!name) return;
-  if(category === 'reasoning' && !baseUrl){
-    alert('Reasoning models need an API endpoint (base URL) so TRIAD knows where to send requests.');
+  if(categories.length === 0){
+    alert('Check at least one category so TRIAD knows when to route to this service.');
+    return;
+  }
+  const needsEndpoint = categories.some(c => c !== 'creation');
+  if(needsEndpoint && !baseUrl){
+    alert('Research, Coding, and Conversational all need an API endpoint (base URL) so TRIAD knows where to send requests.');
     return;
   }
 
   const id = name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
   const palette = ['#a08a6f','#8a9c6f','#8a7ca0','#c9a469','#7a8fa6','#a67a8f'];
   const entry = {
-    id, name, capability, builtin:false,
+    id, name, capability, builtin:false, categories,
     swatch: palette[registry().length % palette.length],
-    type: category === 'reasoning' ? 'core' : 'tool',
+    type: needsEndpoint ? 'core' : 'tool',
     noHeaders: true, // custom services default to no live tracking until proven otherwise
   };
 
-  if(category === 'reasoning'){
+  if(needsEndpoint){
     entry.baseUrl = baseUrl;
     entry.modelId = modelId || null;
     entry.used = 0; entry.limit = 100; entry.reset = 3600; entry.hasRealUsage = false;
